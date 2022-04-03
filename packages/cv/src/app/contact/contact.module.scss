@@ -1,0 +1,21 @@
+.container {
+  padding: 20px;
+
+  & span {
+    color: #6e6c6f;
+    margin-left: 10px;
+  }
+}
+
+.phone {
+
+}
+
+.website {
+  margin: 10px 0px;
+}
+
+.location {
+  font-size: .9em;
+  font-weight: 700;
+}

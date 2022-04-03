@@ -25,3 +25,45 @@
     flex: 1;
   }
 }
+
+.iconWrapper {
+  position: relative;
+  height: 400px;
+}
+
+.icon {
+  border-radius: 3px;
+  overflow: hidden;
+  position: absolute;
+  top: 45px;
+  left: 0px;
+  background-image: url("https://static.gthanasis.com/portofolio-photo.jpg");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 135px 260px;
+  width: 135px;
+  height: 260px;
+  margin-bottom: 100px;
+}
+
+.iconGhost {
+  position: absolute;
+  top: 26px;
+  width: 133px;
+  left: 46px;
+  height: 247px;
+  border: 1px solid black;
+  border-radius: 3px;
+}
+
+.iconGhostContact {
+  position: absolute;
+  top: 70px;
+  left: 155px;
+  background: white;
+  border-radius: 3px;
+}
+
+.signature {
+  height: 400px;
+}

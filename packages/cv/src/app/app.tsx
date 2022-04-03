@@ -1,12 +1,9 @@
 import styles from './app.module.scss'
-import ContactDetails from './contact-details/contact-details'
 import JobsList from './jobs-list/jobs-list'
-import Reference from './reference/reference'
-import JobTitle from './job-title/job-title'
 import Section from './section/section'
-import Job from './job/job'
 import List from './list/list'
 import Signature from './signature/signature'
+import Contact from './contact/contact'
 
 export function App() {
   const skills = [
@@ -31,14 +28,9 @@ export function App() {
       <div className={styles['cv-wrapper']}>
         <div className={styles['columns']}>
           <div className={styles['leftColumn']}>
-            <Signature/>
-          </div>
-          <div className={styles['rightColumn']}>
-            <img width={'200px'} src="https://static.gthanasis.com/portofolio-photo.jpg" alt="Icon" className={styles['cropped']}/>
-          </div>
-        </div>
-        <div className={styles['columns']}>
-          <div className={styles['leftColumn']}>
+            <div className={styles['signature']}>
+              <Signature/>
+            </div>
             <Section title={'Profile'}>
               Obsessed with designing well-thought software through team collaboration.
               Always trying to maximize organization / personal value while maintaining
@@ -54,6 +46,13 @@ export function App() {
             </Section>
           </div>
           <div className={styles['rightColumn']}>
+            <div className={styles['iconWrapper']}>
+              <div className={styles['iconGhost']}/>
+              <div className={styles['iconGhostContact']}>
+                <Contact></Contact>
+              </div>
+              <div className={styles['icon']}/>
+            </div>
             <Section title={'Experience'}>
               <JobsList/>
             </Section>
