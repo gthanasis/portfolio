@@ -4,7 +4,7 @@ import JobTitle from './job-title'
 
 describe('JobTitle', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<JobTitle />)
+    const { baseElement } = render(<JobTitle title={'Hey'} company={'you'} />)
     expect(baseElement).toBeTruthy()
   })
 })
