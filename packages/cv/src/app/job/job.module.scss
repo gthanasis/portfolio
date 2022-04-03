@@ -1,7 +1,19 @@
-/*
- * Replace this with your own classes
- *
- * e.g.
- * .container {
- * }
-*/
+
+
+.periodLine {
+  display: flex;
+  font-style: italic;
+
+  font-size: .8rem;
+
+  margin: 10px 0px;
+}
+
+.periodSeparator {
+  margin: 0px 10px;
+}
+
+.content {
+  font-size: .8rem;
+  color: #6e6c6f;
+}

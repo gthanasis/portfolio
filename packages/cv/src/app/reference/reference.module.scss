@@ -1,7 +1,33 @@
-/*
- * Replace this with your own classes
- *
- * e.g.
- * .container {
- * }
-*/
+.name, .email, .phone {
+  display: flex;
+
+  justify-items: center;
+  align-items: center;
+
+  text-decoration: none;
+}
+
+.nameText, .emailText, .phoneText {
+  margin-left: 10px;
+}
+
+.container {
+  font-size: .8rem;
+}
+
+.container > div, .container > a {
+  margin-bottom: 3px;
+  color: #6e6c6f;
+}
+
+.container .name {
+  color: #353535;
+  font-weight: 700;
+  margin-bottom: 0px;
+}
+
+.container .title {
+  font-style: italic;
+  margin-bottom: 10px;
+  color: #353535;
+}
