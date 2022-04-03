@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "projects": {
+    "cv": "packages/cv",
+    "cv-e2e": "packages/cv-e2e",
+    "ui": "packages/ui"
+  }
+}

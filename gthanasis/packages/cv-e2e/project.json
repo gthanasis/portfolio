@@ -1,0 +1,28 @@
+{
+  "root": "packages/cv-e2e",
+  "sourceRoot": "packages/cv-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nrwl/cypress:cypress",
+      "options": {
+        "cypressConfig": "packages/cv-e2e/cypress.json",
+        "devServerTarget": "cv:serve"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "cv:serve:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/cv-e2e/**/*.{js,ts}"]
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["cv"]
+}
