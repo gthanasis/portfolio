@@ -13,21 +13,22 @@
 
 .container {
   font-size: .8rem;
-}
 
-.container > div, .container > a {
-  margin-bottom: 3px;
-  color: #6e6c6f;
-}
+  & > div,
+  & > a {
+    margin-bottom: 3px;
+    color: #6e6c6f;
+  }
 
-.container .name {
-  color: #353535;
-  font-weight: 700;
-  margin-bottom: 0px;
-}
+  .name {
+    color: #353535;
+    font-weight: 700;
+    margin-bottom: 0px;
+  }
 
-.container .title {
-  font-style: italic;
-  margin-bottom: 10px;
-  color: #353535;
+  .title {
+    font-style: italic;
+    margin-bottom: 10px;
+    color: #353535;
+  }
 }

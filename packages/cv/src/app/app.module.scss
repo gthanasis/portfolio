@@ -1,7 +1,27 @@
-.example {
-  margin: 40px;
+.cv-canvas {
+  height: 100vh;
 
-  h2 {
-    color: rebeccapurple;
+  display: flex;
+
+  justify-content: center;
+  align-content: center;
+}
+
+.cv-wrapper {
+  width: 900px;
+  padding: 40px 0px;
+}
+
+.columns {
+  display: flex;
+
+  .rightColumn {
+    padding: 40px;
+    flex: 2;
+  }
+
+  .leftColumn {
+    padding: 40px;
+    flex: 1;
   }
 }

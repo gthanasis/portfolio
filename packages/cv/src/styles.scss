@@ -2,10 +2,15 @@
 
 body {
   margin: 0px;
-  background: #d7d5d8;
+  //background: #d7d5d8;
   color: #353535;
 
   .wf-active & {
     font-family: Lato, sans-serif;
   }
+}
+
+a {
+  color: #e91e63;
+  text-decoration: none;
 }
