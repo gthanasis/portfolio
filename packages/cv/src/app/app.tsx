@@ -7,7 +7,6 @@ import Reference from './reference/reference'
 import Footer from './footer/footer'
 
 export function App() {
-
   const references = [
     {
       title: 'Founder & CEO',

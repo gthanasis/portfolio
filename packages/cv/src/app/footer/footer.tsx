@@ -14,7 +14,7 @@ export function Footer() {
             <span> View on github </span>
           </div>
         </a>
-        <a target={'_blank'} href="" rel="noreferrer">
+        <a href="https://static.gthanasis.com/cv-thanasis-gkliatis.pdf" target={'_blank'} download={'CV - Gkliatis Thanasis.pdf'}>
           <div className={styles['github']}>
             <FontAwesomeIcon icon={faFilePdf} size="xs" />
             <span> Download pdf </span>
