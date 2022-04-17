@@ -44,7 +44,7 @@ export function JobsList(props: JobsListProps) {
           As part of a good funding round, I stared working on putting together a 6 person team
           to push Socital's software to the next stage and start growing even faster. Besides
           finalizing the dev process, optimizing the team's delivery rate and adding some fresh
-          technologies to the task, I participated in the recruitment process to overcome the
+          technologies to the stack, I participated in the recruitment process to overcome the
           lack of Engineering supply. With constant collaboration with the Product team and the DevOps
           team we managed to create a healthy team that always delivered on time.
           <br/>
