@@ -4,12 +4,9 @@ $icon-width: 135px;
 
 .cv-canvas {
   height: 100vh;
-
   display: flex;
-
   justify-content: center;
   align-content: center;
-
 }
 
 .cv-wrapper {
@@ -24,23 +21,23 @@ $icon-width: 135px;
 .columns {
   display: flex;
 
-  .rightColumn {
+  .right-column {
     padding: 40px;
     flex: 2;
     width: 100%;
   }
 
-  .leftColumn {
+  .left-column {
     padding: 40px;
     flex: 1;
   }
 
   @media (min-width: $breakpoint-desktop) {
-    .rightColumn {
+    .right-column {
       width: initial;
     }
 
-    .leftColumn {
+    .left-column {
       padding: 40px;
       flex: 1;
     }
@@ -48,7 +45,7 @@ $icon-width: 135px;
 
 }
 
-.iconWrapper {
+.icon-wrapper {
   position: relative;
   height: 400px;
 }
@@ -68,7 +65,7 @@ $icon-width: 135px;
   margin-bottom: 100px;
 }
 
-.iconGhost {
+.icon-ghost {
   position: absolute;
   top: 26px;
   width: 133px;
@@ -78,7 +75,7 @@ $icon-width: 135px;
   border-radius: 3px;
 }
 
-.iconGhostContact {
+.icon-ghost-contact {
   background: #fff;
   border-radius: 3px;
   position: absolute;
@@ -154,8 +151,4 @@ $icon-width: 135px;
   @media (min-width: $breakpoint-desktop) {
     display: initial;
   }
-}
-
-.footer {
-  padding: 40px;
 }

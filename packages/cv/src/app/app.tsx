@@ -28,13 +28,13 @@ export function App() {
     <div className={styles['cv-canvas']}>
       <div className={styles['cv-wrapper']}>
         <div className={styles['columns']}>
-          <div className={`${styles['leftColumn']} ${styles['sidenav']}`}>
+          <div className={`${styles['left-column']} ${styles['sidenav']}`}>
             <Sidenav/>
           </div>
-          <div className={styles['rightColumn']}>
-            <div className={styles['iconWrapper']}>
-              <div className={styles['iconGhost']}/>
-              <div className={styles['iconGhostContact']}>
+          <div className={styles['right-column']}>
+            <div className={styles['icon-wrapper']}>
+              <div className={styles['icon-ghost']}/>
+              <div className={styles['icon-ghost-contact']}>
                 <Contact/>
               </div>
               <div className={styles['icon']}/>

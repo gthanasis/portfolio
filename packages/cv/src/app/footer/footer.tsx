@@ -6,8 +6,8 @@ import { faFilePdf } from '@fortawesome/free-solid-svg-icons'
 export function Footer() {
   return (
     <div className={styles['columns']}>
-      <div className={styles['leftColumn']}>© {(new Date().getFullYear())} Thanasis G.</div>
-      <div className={styles['rightColumn']}>
+      <div className={styles['left-column']}>© {(new Date().getFullYear())} Thanasis G.</div>
+      <div className={styles['right-column']}>
         <a target={'_blank'} href="https://github.com/gthanasis/portfolio/tree/main/packages/cv/src" rel="noreferrer">
           <div className={styles['github']}>
             <FontAwesomeIcon icon={faGithub} size="xs" />
