@@ -5,9 +5,10 @@
 
   .right-column {
     display: flex;
-    padding: 40px;
+    padding: 20px;
     flex: 2;
     width: 100%;
+    flex-direction: column;
 
     a {
       margin: 0px 20px;
@@ -15,9 +16,14 @@
   }
 
   .left-column {
-    padding: 40px;
+    padding: 20px;
     flex: 1;
   }
 
-  @media (min-width: $breakpoint-desktop) {}
+  @media (min-width: $breakpoint-desktop) {
+    .right-column, .left-column {
+      padding: 40px;
+      flex-direction: row;
+    }
+  }
 }
