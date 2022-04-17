@@ -1,3 +1,7 @@
+$icon-height: 260px;
+$icon-width: 135px;
+$breakpoint-desktop: 800px;
+
 .cv-canvas {
   height: 100vh;
 
@@ -5,11 +9,16 @@
 
   justify-content: center;
   align-content: center;
+
 }
 
 .cv-wrapper {
-  width: 900px;
+  width: 100%;
   padding: 40px 0px;
+
+  @media (min-width: $breakpoint-desktop) {
+    max-width: 900px;
+  }
 }
 
 .columns {
@@ -18,12 +27,25 @@
   .rightColumn {
     padding: 40px;
     flex: 2;
+    width: 100%;
   }
 
   .leftColumn {
     padding: 40px;
     flex: 1;
   }
+
+  @media (min-width: $breakpoint-desktop) {
+    .rightColumn {
+      width: initial;
+    }
+
+    .leftColumn {
+      padding: 40px;
+      flex: 1;
+    }
+  }
+
 }
 
 .iconWrapper {
@@ -40,9 +62,9 @@
   background-image: url("https://static.gthanasis.com/portofolio-photo.jpg");
   background-position: center center;
   background-repeat: no-repeat;
-  background-size: 135px 260px;
-  width: 135px;
-  height: 260px;
+  background-size: $icon-width $icon-height;
+  width: $icon-width;
+  height: $icon-height;
   margin-bottom: 100px;
 }
 
@@ -57,13 +79,79 @@
 }
 
 .iconGhostContact {
-  position: absolute;
-  top: 70px;
-  left: 155px;
-  background: white;
+  background: #fff;
   border-radius: 3px;
+  position: absolute;
+  top: 40px;
+  width: 280px;
+
+  left: 110px;
+  transform: scale(0.8);
+
+  @media (min-width: $breakpoint-desktop) {
+    left: 140px;
+    transform: scale(1);
+  }
 }
 
-.signature {
-  height: 400px;
+.side-scroll {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar { display: none; }
+
+  & > * {
+    width: 80%;
+    flex: 0 0 auto;
+    margin-right: 3px;
+  }
+
+  &:after {
+    content: "Wait, there is more »";
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    justify-items: center;
+    color: #333;
+    background: white;
+    border-radius: 8px;
+    padding: 5px 10px;
+    margin: 10px 5px;
+    box-shadow: 0px 0px 6px 0px #00000082;
+  }
+
+  @media (min-width: $breakpoint-desktop) {
+    display: none;
+  }
+}
+
+.references {
+  display: flex;
+
+  justify-content: center;
+  align-content: center;
+
+
+  justify-items: center;
+  align-items: center;
+
+  .reference {
+    width: 50%;
+    margin-right: 20px;
+  }
+}
+
+.sidenav {
+  display: none;
+  @media (min-width: $breakpoint-desktop) {
+    display: initial;
+  }
 }

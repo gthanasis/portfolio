@@ -1,3 +1,11 @@
 .job {
   margin-bottom: 35px;
 }
+
+.showOlder {
+  cursor: pointer;
+
+  @media print {
+    display: none;
+  }
+}

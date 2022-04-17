@@ -33,14 +33,14 @@ export function Reference(props: ReferenceProps) {
       <div className={styles['title']}>{title}</div>
       <div className={styles['company']}>{company}</div>
       <div className={styles['location']}>{location}</div>
-      <div className={styles['phone']}>
-        <FontAwesomeIcon icon={faMobile} size="xs" />
-        <div className={styles['phoneText']} >{phone}</div>
-      </div>
-      <div className={styles['email']}>
-        <FontAwesomeIcon icon={faAt} size="xs" />
-        <div className={styles['emailText']} >{email}</div>
-      </div>
+      {/*<div className={styles['phone']}>*/}
+      {/*  <FontAwesomeIcon icon={faMobile} size="xs" />*/}
+      {/*  <div className={styles['phoneText']} >{phone}</div>*/}
+      {/*</div>*/}
+      {/*<div className={styles['email']}>*/}
+      {/*  <FontAwesomeIcon icon={faAt} size="xs" />*/}
+      {/*  <div className={styles['emailText']} >{email}</div>*/}
+      {/*</div>*/}
     </div>
   )
 }
