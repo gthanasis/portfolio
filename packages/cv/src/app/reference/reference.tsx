@@ -9,8 +9,8 @@ export interface ReferenceProps {
   title: string
   company: string
   location: string
-  phone: string
-  email: string
+  phone?: string
+  email?: string
   linkedIn?: string
 }
 
