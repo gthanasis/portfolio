@@ -1,0 +1,23 @@
+@import '../breakpoints';
+
+.columns {
+  display: flex;
+
+  .rightColumn {
+    display: flex;
+    padding: 40px;
+    flex: 2;
+    width: 100%;
+
+    a {
+      margin: 0px 20px;
+    }
+  }
+
+  .leftColumn {
+    padding: 40px;
+    flex: 1;
+  }
+
+  @media (min-width: $breakpoint-desktop) {}
+}

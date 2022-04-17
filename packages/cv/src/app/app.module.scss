@@ -1,6 +1,6 @@
+@import './breakpoints';
 $icon-height: 260px;
 $icon-width: 135px;
-$breakpoint-desktop: 800px;
 
 .cv-canvas {
   height: 100vh;
@@ -154,4 +154,8 @@ $breakpoint-desktop: 800px;
   @media (min-width: $breakpoint-desktop) {
     display: initial;
   }
+}
+
+.footer {
+  padding: 40px;
 }

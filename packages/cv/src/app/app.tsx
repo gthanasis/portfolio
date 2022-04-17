@@ -1,29 +1,24 @@
 import styles from './app.module.scss'
 import JobsList from './jobs-list/jobs-list'
 import Section from './section/section'
-import List from './list/list'
-import Signature from './signature/signature'
 import Contact from './contact/contact'
 import Sidenav from './sidenav/sidenav'
 import Reference from './reference/reference'
+import Footer from './footer/footer'
 
 export function App() {
 
   const references = [
     {
       title: 'Founder & CEO',
-      email: 'theo@socital.com',
       location: 'Athens, GR',
-      phone: '+306912121212',
       name: 'Theo Vasileiadis',
       company: 'Socital & Kariera.gr',
       linkedIn: 'https://www.linkedin.com/in/theofilosvasiliadis/'
     },
     {
       title: 'Technical Product Manager',
-      email: 'zaoudis@gmail.com',
       location: 'Athens, GR',
-      phone: '+30691212121212',
       name: 'Giannis Zaoudis',
       company: 'Kariera.gr & Pollfish',
       linkedIn: 'https://www.linkedin.com/in/zaoudis/'
@@ -60,6 +55,7 @@ export function App() {
             </Section>
           </div>
         </div>
+        <Footer/>
       </div>
     </div>
   )
