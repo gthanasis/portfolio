@@ -59,7 +59,7 @@ $icon-width: 135px;
   background-image: url("https://static.gthanasis.com/portfolio-photo.jpg");
   background-position: center center;
   background-repeat: no-repeat;
-  background-size: $icon-width $icon-height;
+  background-size: cover;
   width: $icon-width;
   height: $icon-height;
   margin-bottom: 100px;
