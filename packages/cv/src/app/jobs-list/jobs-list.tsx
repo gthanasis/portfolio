@@ -35,10 +35,40 @@ export function JobsList(props: JobsListProps) {
     <div className={styles['container']}>
       <div className={styles['job']} >
         <Job
+          title={'Software Development Manager'}
+          company={'Upstream'}
+          period={{
+            from: new Date('Jan 01, 2022')
+          }}
+        >
+          As Socital joined forces with Upstream, we started infusing Upstream's technology into our products
+          and transforming it for launch in the Brazilian market. We managed to migrate our infrastructure, team,
+          and technology to the new domain as we built and launched the new product in just several months. After
+          the launch, we started working on the top market priorities and worked closely with Upstream's architects
+          to ensure that the product was aligned with the general technical vision. We also managed to create processes
+          for cross-team communication to make teams work together seamlessly.
+          <br/>
+          <br/>
+          Some projects that I am proud of:
+          <br/>
+          <br/>
+          <List items={[
+            'Worked alongside the devops team to re-build the whole infrastructure for the Brazilian product',
+            'Launched the V2 of a DnD on-site campaign editor, our biggest tech/customer-facing revamp',
+            'Transferred the majority of our codebase to TS adding types and improving consistency along the way',
+            'Launched a product from a completely different business domain (using our e-comm expertise) in just a few months',
+            'Deeply integrated our platform with the top Brazilian e-commerce tools',
+            'Adjusted rapidly to upstreams ecosystem using our integrations hub while designing a solid long term solution'
+          ]} />
+        </Job>
+      </div>
+      <div className={styles['job']} >
+        <Job
           title={'Tech lead'}
           company={'Socital'}
           period={{
-            from: new Date('Jan 01, 2020')
+            from: new Date('Jan 01, 2020'),
+            to: new Date('Dec 30, 2021')
           }}
         >
           As part of a good funding round, I stared working on putting together a 6 person team

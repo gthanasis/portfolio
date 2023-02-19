@@ -44,11 +44,13 @@ export function Sidenav(props: SidenavProps) {
         <Signature/>
       </div>
       <Section title={'Profile'}>
-        Obsessed with designing well-thought software through team collaboration.
-        Always trying to maximize organization / personal value while maintaining
-        code quality, best practices, and fulfilling my code cravings.
-        Lately into user experience, microservices, micro frontends, D3 data visualizations,
-        HA/FT systems.
+        Highly motivated software engineer with a passion for designing well-architected
+        software through team collaboration. With a strong commitment to quality,
+        I consistently strive to maximize organizational and personal value while adhering
+        to best practices. My expertise includes clean architecture, high-availability and
+        fault-tolerant systems, event-driven design, and a recent focus on micro frontends.
+        I am dedicated to staying up-to-date on the latest technology trends and committed
+        to continuously improving my skills.
       </Section>
       <Section title={'Skills'}>
         <List items={skills} />
