@@ -13,7 +13,20 @@ metadata:
     app.kubernetes.io/name: portfolio
 spec:
   ingressClassName: nginx
+  # Both hostnames serve the same CV. The apex used to point at the old
+  # DigitalOcean droplet, where it answered nothing useful — it did not even
+  # have a certificate covering the bare domain, so it failed TLS outright.
   rules:
+    - host: gthanasis.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portfolio
+                port:
+                  name: http
     - host: cv.gthanasis.com
       http:
         paths:
