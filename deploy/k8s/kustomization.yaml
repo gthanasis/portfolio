@@ -1,10 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# The namespace itself is deliberately not a resource here. This is applied by
+# CI, whose ServiceAccount is scoped to this one namespace and cannot even read
+# a Namespace object — including it made every deploy exit non-zero after the
+# app had already rolled out fine. The namespace is created once, out of band,
+# by infra's scripts/grant-ci-deploy.sh.
 namespace: portfolio
 
 resources:
-  - namespace.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
