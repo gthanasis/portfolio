@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portfolio
+  namespace: portfolio
+  labels:
+    app.kubernetes.io/name: portfolio
+spec:
+  # Two on a single-node cluster is not redundancy — it is so a rolling
+  # update never has zero serving pods. maxUnavailable: 0 below is what
+  # actually makes the deploy seamless.
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portfolio
+  template:
+    metadata:
+      labels:
+        # Alloy turns this into the `app` label on every log line, which is
+        # how these logs are separated from other apps in Grafana.
+        app.kubernetes.io/name: portfolio
+    spec:
+      containers:
+        - name: portfolio
+          # Replaced per-deploy by kustomize; this default is only what you
+          # get running `kubectl apply -k` by hand.
+          image: ghcr.io/gthanasis/portfolio:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          # Static files served from memory-cached disk — this is genuinely
+          # tiny, and being honest about it leaves the node's headroom for
+          # apps that need it.
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false # nginx writes temp files under /tmp
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+      # Spreads the two pods once a second node exists; a no-op until then.
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: portfolio
+---
+# Keeps at least one pod serving when a node is drained for an OS upgrade,
+# which kured does unattended.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: portfolio
+  namespace: portfolio
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: portfolio

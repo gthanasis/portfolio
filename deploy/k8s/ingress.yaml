@@ -1,0 +1,26 @@
+# The tunnel's catch-all forwards any hostname it does not route explicitly to
+# the nginx ingress controller, so publishing is just this Ingress plus a DNS
+# CNAME — no tunnel change.
+#
+# No TLS block and no cert-manager annotation on purpose: certificates
+# terminate at Cloudflare, and the tunnel speaks plain HTTP to the cluster.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portfolio
+  namespace: portfolio
+  labels:
+    app.kubernetes.io/name: portfolio
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cv.gthanasis.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portfolio
+                port:
+                  name: http

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: portfolio
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+
+# CI overwrites the tag with the commit SHA (`kustomize edit set image`), so
+# every deploy references an immutable image rather than a moving :latest —
+# which is what makes a rollback a matter of re-applying an older tag.
+images:
+  - name: ghcr.io/gthanasis/portfolio
+    newTag: latest

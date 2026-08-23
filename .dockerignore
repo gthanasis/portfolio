@@ -1,0 +1,13 @@
+# Everything the build does not read. Keeps the context small and stops a
+# stale local dist/ or node_modules from leaking into the image.
+node_modules
+**/node_modules
+dist
+tmp
+.git
+.github
+.vscode
+.nx
+coverage
+*.log
+.DS_Store
