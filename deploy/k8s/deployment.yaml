@@ -71,15 +71,35 @@ spec:
                   matchLabels:
                     app.kubernetes.io/name: portfolio
 ---
-# Keeps at least one pod serving when a node is drained for an OS upgrade,
-# which kured does unattended.
+# Deliberately permits full disruption, which reads wrong until you count the
+# nodes. There is one. Draining it cordons it, so an evicted pod has nowhere
+# to reschedule and "keep one pod serving through the drain" is not a thing
+# the cluster can do — the node is about to reboot and take both pods with it
+# either way.
+#
+# minAvailable: 1 was the previous value, and on one node it cannot be
+# satisfied during a drain: evicting the first pod leaves one healthy and zero
+# disruptions allowed, its replacement stays Pending on the cordoned node, and
+# the second eviction is refused forever. Two replicas do not help; they move
+# the deadlock one eviction later. On 2026-08-28 that held kured in a retry
+# loop for 6h41m and left 26 pods Pending cluster-wide, including all of
+# monitoring, so nothing was able to report it.
+#
+# The infra repo now sets kured's drain-timeout and force-reboot, which bounds
+# the damage to a five-minute delay per reboot rather than a stranded node.
+# This removes the delay too, and stops a PDB that protects nothing from being
+# the thing that blocks every drain.
+#
+# When a second node exists, this goes back to minAvailable: 1 and starts
+# doing what its name suggests. The podAntiAffinity above is already waiting
+# for that day.
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: portfolio
   namespace: portfolio
 spec:
-  minAvailable: 1
+  maxUnavailable: 100%
   selector:
     matchLabels:
       app.kubernetes.io/name: portfolio
