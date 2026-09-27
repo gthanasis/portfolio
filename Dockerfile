@@ -1,7 +1,7 @@
 # Build both static sites, then serve them from nginx. Nothing from the build
 # stage reaches the final image: no node_modules, no source, no toolchain.
 
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 
 # Dependencies first, as their own layer: source changes far more often than
