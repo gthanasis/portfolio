@@ -1,0 +1,102 @@
+/* Brand tokens shared by gthanasis.com and cv.gthanasis.com.
+   Semantic names, HSL triplets: use as hsl(var(--primary)) or hsl(var(--primary) / .5).
+   Light is the default; dark applies via [data-theme='dark'] or the OS preference. */
+:root {
+  --background: 220 14% 98%;
+  --foreground: 220 15% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 15% 9%;
+  --muted: 220 12% 94%;
+  --muted-foreground: 220 8% 42%;
+  --border: 220 12% 88%;
+  --primary: 40 75% 36%;
+  --primary-foreground: 0 0% 100%;
+  --ring: 40 75% 36%;
+  --destructive: 0 72% 50%;
+  --diff-add: 142 60% 32%;
+  --diff-add-bg: 142 60% 45% / 0.1;
+  --grid: 220 15% 9% / 0.06;
+  --radius: 0.75rem;
+  /* one colour per result chart */
+  --chart-1: 262 60% 55%;
+  --chart-2: 199 80% 40%;
+  --chart-3: 8 75% 52%;
+  --chart-4: 170 65% 32%;
+  --chart-5: 40 75% 36%;
+  /* GitHub's own contribution greens */
+  --gh-0: 216 12% 92%;
+  --gh-1: 130 63% 76%;
+  --gh-2: 137 53% 51%;
+  --gh-3: 136 54% 41%;
+  --gh-4: 138 54% 28%;
+  /* one colour per agent role in the build loop */
+  --agent-setup: 199 80% 38%;
+  --agent-build: 172 70% 32%;
+  --agent-test: 88 70% 32%;
+  --agent-qa: 330 65% 48%;
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+    --background: 220 10% 5%;
+    --foreground: 220 10% 94%;
+    --card: 220 9% 8%;
+    --card-foreground: 220 10% 94%;
+    --muted: 220 8% 12%;
+    --muted-foreground: 220 6% 60%;
+    --border: 220 8% 16%;
+    --primary: 42 70% 60%;
+    --primary-foreground: 220 10% 5%;
+    --ring: 42 70% 60%;
+    --destructive: 0 80% 62%;
+    --diff-add: 142 65% 58%;
+    --diff-add-bg: 142 65% 50% / 0.1;
+    --grid: 220 10% 94% / 0.05;
+    --agent-setup: 199 85% 62%;
+    --agent-build: 170 65% 55%;
+    --agent-test: 84 80% 60%;
+    --agent-qa: 330 80% 70%;
+    --gh-0: 215 21% 11%;
+    --gh-1: 150 66% 16%;
+    --gh-2: 148 100% 21%;
+    --gh-3: 134 63% 40%;
+    --gh-4: 128 63% 53%;
+    --chart-1: 262 85% 74%;
+    --chart-2: 199 90% 66%;
+    --chart-3: 8 90% 70%;
+    --chart-4: 168 60% 55%;
+    --chart-5: 42 70% 60%;
+    color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --background: 220 10% 5%;
+    --foreground: 220 10% 94%;
+    --card: 220 9% 8%;
+    --card-foreground: 220 10% 94%;
+    --muted: 220 8% 12%;
+    --muted-foreground: 220 6% 60%;
+    --border: 220 8% 16%;
+    --primary: 42 70% 60%;
+    --primary-foreground: 220 10% 5%;
+    --ring: 42 70% 60%;
+    --destructive: 0 80% 62%;
+    --diff-add: 142 65% 58%;
+    --diff-add-bg: 142 65% 50% / 0.1;
+    --grid: 220 10% 94% / 0.05;
+    --agent-setup: 199 85% 62%;
+    --agent-build: 170 65% 55%;
+    --agent-test: 84 80% 60%;
+    --agent-qa: 330 80% 70%;
+    --gh-0: 215 21% 11%;
+    --gh-1: 150 66% 16%;
+    --gh-2: 148 100% 21%;
+    --gh-3: 134 63% 40%;
+    --gh-4: 128 63% 53%;
+    --chart-1: 262 85% 74%;
+    --chart-2: 199 90% 66%;
+    --chart-3: 8 90% 70%;
+    --chart-4: 168 60% 55%;
+    --chart-5: 42 70% 60%;
+    color-scheme: dark;
+  }
+}

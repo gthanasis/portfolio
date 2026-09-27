@@ -1,0 +1,38 @@
+/* Element defaults and the few primitives both sites share. */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.55;
+}
+.mono { font-family: var(--font-mono), ui-monospace, monospace; }
+a { color: inherit; }
+::selection { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; border-radius: 6px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  min-height: 44px; padding: 0 1.1rem; border-radius: 999px;
+  font: 500 .95rem var(--font-sans), sans-serif; text-decoration: none; cursor: pointer;
+  border: 1px solid hsl(var(--border)); background: hsl(var(--card)); color: hsl(var(--foreground));
+  transition: transform .15s, background .15s, border-color .15s;
+}
+.btn:hover { border-color: hsl(var(--foreground) / .35); }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-color: transparent; }
+.btn-primary:hover { background: hsl(var(--primary) / .9); border-color: transparent; }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-ghost:hover { background: hsl(var(--muted)); }
+.icon { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.kbd {
+  font: 500 .72rem var(--font-mono), monospace; padding: .1rem .35rem; border-radius: 5px;
+  border: 1px solid hsl(var(--border)); background: hsl(var(--muted)); color: hsl(var(--muted-foreground));
+}
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
