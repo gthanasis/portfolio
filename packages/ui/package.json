@@ -4,6 +4,15 @@
   "private": true,
   "exports": {
     "./tokens.css": "./tokens.css",
-    "./base.css": "./base.css"
+    "./base.css": "./base.css",
+    "./Logo": "./Logo.tsx",
+    "./analytics": "./analytics.ts",
+    "./Analytics": "./Analytics.tsx",
+    "./ConsentBanner": "./ConsentBanner.tsx",
+    "./consent.css": "./consent.css"
+  },
+  "peerDependencies": {
+    "next": ">=16",
+    "react": ">=19"
   }
 }

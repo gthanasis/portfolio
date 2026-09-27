@@ -1,3 +1,4 @@
+import { ConsentSettingsLink } from '@gthanasis/ui/ConsentBanner'
 import { site } from '@/lib/site'
 
 export function Footer() {
@@ -12,6 +13,7 @@ export function Footer() {
         <a href={site.linkedin} rel="me">
           LinkedIn
         </a>
+        <ConsentSettingsLink />
       </nav>
     </footer>
   )

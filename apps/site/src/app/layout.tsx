@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@gthanasis/ui/Analytics'
+import { ConsentBanner } from '@gthanasis/ui/ConsentBanner'
 import '@gthanasis/ui/tokens.css'
 import '@gthanasis/ui/base.css'
+import '@gthanasis/ui/consent.css'
 import './site.css'
 import { site } from '@/lib/site'
 
@@ -76,8 +79,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <Analytics />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ConsentBanner />
+      </body>
     </html>
   )
 }

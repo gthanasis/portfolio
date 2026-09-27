@@ -30,21 +30,18 @@ export const jobs: Job[] = [
     title: 'Founding Engineer', org: 'Perkit (Ekinox S.A.)', from: 'Mar 2026', to: 'Apr 2026',
     link: { label: 'Perkit', href: 'https://perkit.gr' },
     bullets: [
-      'Built Perkit, an employee benefits platform, from a blank repository while the company was bootstrapping.',
-      'Set up the monorepo and architecture: NestJS API, Next.js web app for employers and an Expo / React Native app for employees, sharing one TypeScript codebase.',
-      'Modelled the data with Prisma and integrated Stripe for payments.',
-      'Laid down the infrastructure in Terraform and Kubernetes, and a shared shadcn component library.',
-      'Top contributor to the codebase during the greenfield phase.',
+      'Built Perkit, an employee benefits platform, from a blank repository while the company was bootstrapping, as its top contributor.',
+      'Designed the stack: NestJS API, Next.js employer app and an Expo / React Native employee app on one TypeScript monorepo.',
+      'Set up Prisma, Stripe payments, Terraform and Kubernetes infrastructure, and a shared component library.',
     ],
     stack: 'nestjs · next.js · expo · prisma · stripe · terraform · k8s',
   },
   {
     title: 'Principal Software Engineer', org: 'Kariera Group', from: 'Mar 2025', to: 'May 2026',
     bullets: [
-      'Set microservice boundaries and integration patterns adopted by teams across job board, billing and candidate management.',
-      'Shipped semantic search and recommendations on OpenAI embeddings and LLMs; users with 2+ expressed interests grew from **35% to 60%**.',
-      'Led adoption of LLM-assisted development to **80% of engineers**, with guardrails and shared practices.',
-      'Cut self-hosting costs by **$5k/month** by replacing Druid with Kafka Connect, Iceberg and batch jobs.',
+      'Set the microservice boundaries and integration patterns adopted across job board, billing and candidate teams.',
+      'Shipped semantic search and recommendations on OpenAI embeddings; users with 2+ interests grew from **35% to 60%**.',
+      'Led LLM-assisted development to **80% of engineers**, and cut hosting costs by **$5k/month** by replacing Druid.',
     ],
     stack: 'nestjs · kafka · postgresql · elasticsearch · openai · iceberg',
   },
@@ -53,45 +50,36 @@ export const jobs: Job[] = [
     bullets: [
       'Rebuilt the resume database into a full product; NPS went from **3-4 to 7-8** within a month.',
       'Designed fault-tolerant, near-real-time sync for **3M+ candidate profiles** on Kafka, PostgreSQL and Elasticsearch.',
-      'Led the move from a monolithic job board to event-driven microservices; deploys went from about one every 1.5 weeks to **5 a week**.',
-      'Built the platform that imports job postings from multiple external sources.',
-      'Moved the frontend to Next.js (SSR/SSG), fixing rendering bottlenecks and improving SEO.',
+      'Moved the job board from a monolith to event-driven microservices; deploys went from one every 1.5 weeks to **5 a week**.',
     ],
   },
   {
     title: 'Software Development Manager', org: 'Upstream, via Socital acquisition', from: 'Jan 2022', to: 'Dec 2023',
     bullets: [
-      "Led the technical strategy for launching Socital's platform in Brazil after the acquisition, on an aggressive timeline.",
-      'Migrated infrastructure to a new cloud environment for the new market without interrupting service.',
-      'Led the design of the V2 campaign editor, the largest customer-facing revamp.',
-      'Ran the TypeScript migration programme across services.',
-      'Architected integrations with Brazilian e-commerce platforms: webhooks, rate limiting and data sync.',
-      'Defined the architecture for entering a new business vertical by reusing existing capabilities.',
+      "Led the technical launch of Socital's platform in Brazil after the acquisition, including a new cloud environment, on a tight timeline.",
+      'Led the V2 campaign editor, the largest customer-facing revamp, and the move of the codebase to TypeScript.',
+      'Designed integrations with Brazilian e-commerce platforms and the architecture for a new business vertical.',
     ],
   },
   {
     title: 'Tech Lead', org: 'Socital', from: 'Jan 2020', to: 'Dec 2021',
     bullets: [
-      'Owned platform architecture and long-term technical strategy through a period of rapid growth.',
-      'Architected a multi-vendor subscription and billing system with event-driven payments and reconciliation.',
-      'Reduced the public script bundle by **80%** through code splitting and build pipeline work.',
-      'Set up the testing strategy with Cypress E2E for critical flows, wired into CI.',
-      'Modernised infrastructure: blue/green Ansible deploys, centralised ELK logging, standard monitoring.',
+      'Owned platform architecture through rapid growth, including a multi-vendor subscription and billing system.',
+      'Cut the public script bundle by **80%** and set up Cypress E2E testing for critical flows in CI.',
+      'Modernised infrastructure: blue/green Ansible deploys, centralised ELK logging and standard monitoring.',
     ],
   },
   {
     title: 'Senior Software Engineer', org: 'Socital', from: 'Jan 2018', to: 'Dec 2020',
     bullets: [
-      'Structured the monorepo with Yarn workspaces and clear package boundaries.',
-      'Built a rate-limited integration service with internal queueing for high-volume third-party APIs.',
-      'Refactored core domain models with DDD patterns to reduce coupling.',
+      'Structured the monorepo with Yarn workspaces and refactored core domain models with DDD patterns.',
+      'Built a rate-limited, queue-backed integration service for high-volume third-party APIs.',
     ],
   },
   {
     title: 'Software Engineer', org: 'Socital', from: 'Oct 2016', to: 'Jan 2018',
     bullets: [
-      'Built integrations with Mailchimp, Moosend and Magento, and the API client patterns later partners reused.',
-      'Designed a Magento extension connecting the CMS to the on-site campaign platform.',
+      'Built integrations with Mailchimp, Moosend and Magento, including a Magento extension for on-site campaigns.',
     ],
   },
 ]
@@ -114,7 +102,3 @@ export const education = { degree: 'B.Sc. Informatics', school: 'Ionian Universi
 
 export const talks = [{ title: 'Tech excellence in start-ups', where: 'Developer Talks', href: 'https://www.youtube.com/watch?v=QnkJZYZ8dBk' }]
 
-export const references = [
-  { name: 'Theo Vasileiadis', role: 'Founder & CEO, Socital & Kariera.gr', href: 'https://www.linkedin.com/in/theofilosvasiliadis/' },
-  { name: 'Giannis Zaoudis', role: 'Technical Product Manager, Kariera.gr & Pollfish', href: 'https://www.linkedin.com/in/zaoudis/' },
-]

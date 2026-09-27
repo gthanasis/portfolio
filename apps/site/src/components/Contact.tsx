@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { track } from '@gthanasis/ui/analytics'
 import { site } from '@/lib/site'
 
 const IDEAS = [
@@ -55,11 +56,13 @@ export function Contact() {
   const placeholder = useGhostPlaceholder(status === 'idea' && !idea)
   const canContinue = idea.trim().length >= 8
 
-  // Move focus with the step, but never on first render: that would steal
-  // focus on page load and open the keyboard on phones.
-  const moved = useRef(false)
+  // Move focus only when the step actually changes. Never on load (it would
+  // steal focus and open the keyboard on phones), including React's dev-mode
+  // double effect run, which a "skip the first run" flag does not survive.
+  const prevStatus = useRef<Status>(status)
   useEffect(() => {
-    if (!moved.current) return void (moved.current = true)
+    if (prevStatus.current === status) return
+    prevStatus.current = status
     if (status === 'who') emailRef.current?.focus()
     if (status === 'idea') ideaRef.current?.focus()
   }, [status])
@@ -84,6 +87,7 @@ export function Contact() {
         body: JSON.stringify({ idea: idea.trim(), email: email.trim(), name: name.trim(), source: 'gthanasis.com', website }),
       })
       setStatus(res.ok ? 'sent' : 'error')
+      if (res.ok) track('generate_lead', { method: 'contact_form' })
     } catch {
       setStatus('error')
     }
