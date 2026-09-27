@@ -44,6 +44,12 @@ updates:
       npm-security:
         applies-to: security-updates
         patterns: ["*"]
+    # eslint-config-next pulls in eslint-plugin-react, which crashes on
+    # ESLint 10 (context.getFilename was removed). Drop this once
+    # eslint-config-next supports ESLint 10; security updates still come.
+    ignore:
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: docker
     directories:
