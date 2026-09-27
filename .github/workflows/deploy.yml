@@ -1,6 +1,6 @@
 name: deploy
 
-# Build the image and roll it out. Only main deploys; a PR builds so that a
+# Build the image (both sites) and roll it out. Only main deploys; a PR builds so that a
 # broken Dockerfile is caught before it is merged, but pushes nothing and
 # touches no cluster.
 on:
@@ -9,6 +9,10 @@ on:
     paths-ignore: ["**.md", ".vscode/**"]
   pull_request:
   workflow_dispatch:
+  # Daily rebuild: the GitHub activity on gthanasis.com is baked in at build
+  # time, so this is what keeps it current.
+  schedule:
+    - cron: "0 5 * * *"
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -20,7 +24,20 @@ env:
   NAMESPACE: portfolio
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+
   deploy:
+    needs: check
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,6 +69,10 @@ jobs:
             ${{ env.IMAGE }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # The contact form's webhook, from a repository variable. Empty means
+          # the form falls back to opening the visitor's mail client.
+          build-args: |
+            NEXT_PUBLIC_CONTACT_ENDPOINT=${{ vars.CONTACT_ENDPOINT }}
 
       # --- everything below only runs for a real deploy ---
 
