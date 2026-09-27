@@ -1,6 +1,6 @@
-/* The consent prompt: a small terminal card floating bottom-left. */
+/* The consent prompt: a small terminal card floating bottom-right. */
 .gt-consent {
-  position: fixed; z-index: 60; left: 20px; bottom: 20px; width: min(380px, calc(100vw - 24px));
+  position: fixed; z-index: 60; right: 20px; bottom: 20px; width: min(380px, calc(100vw - 24px));
   padding: 16px 16px 14px; border-radius: 14px; border: 1px solid hsl(var(--border));
   background: hsl(var(--card) / .96); backdrop-filter: blur(10px);
   box-shadow: 0 24px 60px -24px hsl(0 0% 0% / .55);

@@ -46,7 +46,7 @@ export function ConsentBanner() {
         <span className="gt-consent-prompt" aria-hidden="true">~ $</span> analytics --opt-in<span className="gt-consent-caret">?</span>
       </p>
       <p className="gt-consent-d" id="gt-consent-d">
-        Anonymous page stats through Google Analytics. No ads, nothing sold, and saying no changes nothing on the site.
+        Mind if I count visits? Just anonymous stats, no ads. Either answer is fine.
       </p>
       <div className="gt-consent-actions">
         <button type="button" className="gt-consent-btn yes" onClick={() => choose(true)}>
