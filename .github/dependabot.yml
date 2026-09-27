@@ -1,0 +1,66 @@
+version: 2
+
+# Monthly and grouped so each ecosystem opens a PR or two per cycle, not a
+# flood: minor+patch together, majors separately, security fixes as they land.
+# Same shape as gthanasis/b2p. Where this repo pins images in Kubernetes or
+# Helm YAML, those are covered too: stale hand-pinned images (rclone 1.68,
+# mongo 7.0.1) were most of the 2026-09 Trivy findings (gthanasis/infra#37).
+updates:
+
+  - package-ecosystem: github-actions
+    directories:
+      - "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      actions-major:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["major"]
+      actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directories:
+      - "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      npm:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      npm-major:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["major"]
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories:
+      - "/"
+      - "/deploy/k8s"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      docker:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      docker-major:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["major"]
+      docker-security:
+        applies-to: security-updates
+        patterns: ["*"]
