@@ -1,7 +1,7 @@
 import { Toolbar } from '@/components/Toolbar'
 import { Highlights } from '@/components/Highlights'
 import { Rich } from '@/components/Rich'
-import { person, summary, jobs, projects, skills, education, talks, references } from '@/lib/cv'
+import { person, summary, jobs, projects, skills, education, talks } from '@/lib/cv'
 
 const host = (u: string) => u.replace(/^https?:\/\/(www\.)?/, '')
 
@@ -120,17 +120,6 @@ export default function CV() {
                   <a href={t.href}>
                     <b>{t.title}</b>
                     <span>{t.where} ↗</span>
-                  </a>
-                </div>
-              ))}
-            </section>
-            <section id="references">
-              <h2>References</h2>
-              {references.map((r) => (
-                <div key={r.name} className="side-item">
-                  <a href={r.href}>
-                    <b>{r.name}</b>
-                    <span>{r.role}</span>
                   </a>
                 </div>
               ))}

@@ -45,7 +45,7 @@ section { margin-bottom: 36px; scroll-margin-top: 80px; }
 .job ul { margin: 8px 0 0; padding-left: 16px; display: grid; gap: 5px; font-size: .92rem; }
 .job li::marker { color: hsl(var(--muted-foreground)); }
 /* highlighter: the marker sweeps across each metric as its job scrolls into view */
-.job b { font-weight: 600; color: hsl(var(--foreground)); padding: 0 3px; border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
+.job b { font-weight: 600; color: hsl(var(--foreground)); padding: 0 3px; margin: 0 -3px; border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone;
   background: linear-gradient(90deg, hsl(var(--primary) / .28), hsl(var(--primary) / .18)) no-repeat 0 0 / 0% 100%;
   transition: background-size .9s cubic-bezier(.65,0,.35,1); }
 .job.lit b { background-size: 100% 100%; }
@@ -90,4 +90,21 @@ dialog li[aria-selected='true'] { background: hsl(var(--muted)); }
   .cols { grid-template-columns: 1fr 190px; gap: 28px; }
   h1 { font-size: 30pt; }
   .job b { background: none !important; padding: 0; }
+}
+
+/* Toolbar on phones: a full-width bar of four equal, thumb-sized buttons.
+   The command menu needs a keyboard, so it goes. */
+.tools .short { display: none; }
+@media (max-width: 600px) {
+  .tools { padding: 10px 12px; }
+  .tools .inner { width: 100%; justify-content: space-between; border-radius: 16px; }
+  .tools .inner .btn { flex: 1; justify-content: center; min-height: 44px; padding: 0 .5rem; }
+  .tools .long, .tools .cmdk { display: none; }
+  .tools .short { display: inline; }
+}
+
+/* Phones: the date gets its own line under the role, every time. */
+@media (max-width: 600px) {
+  .job .top { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .job .when { order: 2; }
 }

@@ -84,13 +84,15 @@ export function Toolbar() {
             </svg>
             PDF
           </button>
-          <button className="btn btn-ghost" onClick={copyEmail}>
-            Copy email
+          <button className="btn btn-ghost" onClick={copyEmail} aria-label="Copy email address">
+            <span className="long">Copy email</span>
+            <span className="short">Email</span>
           </button>
           <a className="btn btn-ghost" href={person.web}>
-            gthanasis.com
+            <span className="long">gthanasis.com</span>
+            <span className="short">Site</span>
           </a>
-          <button className="btn btn-ghost" onClick={openPalette} aria-label="Open command menu">
+          <button className="btn btn-ghost cmdk" onClick={openPalette} aria-label="Open command menu">
             <span className="kbd">⌘K</span>
           </button>
           <button className="btn btn-ghost" onClick={toggleTheme} aria-label="Toggle light and dark theme" style={{ padding: '0 .7rem' }}>

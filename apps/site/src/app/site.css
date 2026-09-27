@@ -217,3 +217,5 @@ footer a { color: inherit; } footer nav a { padding: 12px 0; }
 .send-err a { color: inherit; }
 button:disabled { cursor: default; }
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.bar .name { display: inline-flex; align-items: center; min-height: 44px; }
+.bar .logo { height: 24px; width: auto; display: block; }
