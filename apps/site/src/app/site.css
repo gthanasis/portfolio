@@ -219,3 +219,6 @@ button:disabled { cursor: default; }
 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .bar .name { display: inline-flex; align-items: center; min-height: 44px; }
 .bar .logo { height: 24px; width: auto; display: block; }
+
+/* The consent prompt lines up with the content column (.wrap). */
+:root { --gt-container: 1080px; --gt-gutter: 24px; }

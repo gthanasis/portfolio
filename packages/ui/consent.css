@@ -1,6 +1,9 @@
-/* The consent prompt: a small terminal card floating bottom-right. */
+/* The consent prompt: a small terminal card floating bottom-right, its right
+   edge lined up with the page's content column. Each site sets the column's
+   width and inner gutter; narrower screens fall back to a 20px edge. */
 .gt-consent {
-  position: fixed; z-index: 60; right: 20px; bottom: 20px; width: min(380px, calc(100vw - 24px));
+  position: fixed; z-index: 60; bottom: 20px;
+  right: max(20px, calc((100% - var(--gt-container, 1080px)) / 2 + var(--gt-gutter, 24px))); width: min(380px, calc(100vw - 24px));
   padding: 16px 16px 14px; border-radius: 14px; border: 1px solid hsl(var(--border));
   background: hsl(var(--card) / .96); backdrop-filter: blur(10px);
   box-shadow: 0 24px 60px -24px hsl(0 0% 0% / .55);
