@@ -2,7 +2,7 @@ export type Day = { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 }
 export type Contributions = { days: Day[]; total: number; perActiveDay: number; streak: number }
 
 // Fetched at build time, so the numbers are in the HTML crawlers and
-// no-JS visitors get. A daily scheduled deploy keeps them fresh.
+// no-JS visitors get, then again in the browser by GitHubLive.
 export async function getContributions(user: string): Promise<Contributions | null> {
   try {
     const res = await fetch(`https://github-contributions-api.jogruber.de/v4/${user}?y=last`, {

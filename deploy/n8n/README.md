@@ -56,3 +56,5 @@ from the `CONTACT_ENDPOINT` repository variable.
 - Leads go to the Telegram chat the cluster alerts use (`-5444251559`).
 - Failures (for example the Anthropic API being down) leave rows at `new`, so
   the next run retries them.
+- At most 10 requests are reviewed per run. The webhook is public, so a flood of
+  submissions can only cost 40 model calls an hour; the rest wait their turn.

@@ -38,7 +38,8 @@
             }
           ]
         },
-        "returnAll": true
+        "returnAll": false,
+        "limit": 10
       },
       "id": "dc20b75e-08c3-4e46-ae96-22606229ac18",
       "name": "Get new requests",

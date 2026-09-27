@@ -1,7 +1,7 @@
 # Build both static sites, then serve them from nginx. Nothing from the build
 # stage reaches the final image: no node_modules, no source, no toolchain.
 
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 
 # Dependencies first, as their own layer: source changes far more often than
@@ -24,7 +24,7 @@ RUN npm run build
 # ---
 
 # The unprivileged variant: runs as a non-root user throughout and listens on 8080.
-FROM nginxinc/nginx-unprivileged:1.29-alpine AS runtime
+FROM nginxinc/nginx-unprivileged:1.31-alpine AS runtime
 
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY deploy/security-headers.conf /etc/nginx/snippets/security-headers.conf
