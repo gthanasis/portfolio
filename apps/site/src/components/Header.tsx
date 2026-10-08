@@ -10,10 +10,14 @@ export function Header() {
         <Logo className="logo" title={site.name} />
       </Link>
       <nav aria-label="Main">
-        <a href="#results">Results</a>
-        <a href="#projects">Projects</a>
+        <Link href="/#results">Results</Link>
+        <Link href="/#projects">Projects</Link>
         <a href={site.cv}>CV</a>
-        <a href="#contact">Contact</a>
+        <Link href="/#contact">Contact</Link>
+        <span className="nav-sep" aria-hidden="true">
+          |
+        </span>
+        <Link href="/blog">Articles</Link>
       </nav>
       <ThemeToggle />
     </header>

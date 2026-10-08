@@ -8,3 +8,6 @@ npm-debug.log*
 .idea
 .vscode/*
 !.vscode/extensions.json
+
+# generated from apps/site/content/skills by scripts/build-skills.mjs
+apps/site/public/skills/

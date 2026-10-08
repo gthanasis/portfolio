@@ -1,0 +1,128 @@
+---
+title: Break your dev loop down to skills
+summary: Stop re-explaining your workflow to every coding agent.
+description: Nine Claude Code skills that turn your dev loop into steps an agent can run on its own. File tickets, ship PRs from isolated worktrees, test in a real browser.
+date: 2026-10-08
+tags: [agentic coding, claude code]
+draft: false
+toc: false
+---
+
+<SkillList title="tg" meta="Claude Code plugin">
+  <SkillGroup>Tickets</SkillGroup>
+  <SkillRow name="tg:new-ticket" href="#file-a-ticket-worth-picking-up">Note in, proper GitHub issue out.</SkillRow>
+  <SkillRow name="tg:pick-ticket" href="#from-ticket-to-pr">Picks the next ticket and ships it as a PR.</SkillRow>
+  <SkillGroup>Testing</SkillGroup>
+  <SkillRow name="tg:uat" href="#actually-open-the-browser">Opens the browser and checks the thing works.</SkillRow>
+  <SkillGroup>Code</SkillGroup>
+  <SkillRow name="tg:ui" href="#use-the-design-system-you-already-have">Builds with the tokens and components you already have.</SkillRow>
+  <SkillRow name="tg:cleanup" href="#keep-comments-honest">Fixes comments that lie about the code.</SkillRow>
+  <SkillRow name="tg:improve-architecture" href="#fix-the-code-thats-painful-to-change">Finds the messy modules and proposes better ones.</SkillRow>
+  <SkillGroup>Words and numbers</SkillGroup>
+  <SkillRow name="tg:copy" href="#copy-that-doesnt-sound-like-a-bot">Blog and marketing copy, English and Greek.</SkillRow>
+  <SkillRow name="tg:greek-review" href="#greek-that-doesnt-sound-translated">Makes Greek UI text sound Greek.</SkillRow>
+  <SkillRow name="tg:growth" href="#hows-the-site-doing">Analytics, Search Console and Ads in one go.</SkillRow>
+</SkillList>
+
+<Skill name="tg:new-ticket" needs={["git", "gh (logged in)", "GitHub labels"]}>
+## File a ticket worth picking up
+
+Most tickets are a symptom and a shrug. This one does the digging first.
+</Skill>
+
+**What it does.** You give it a note like "invite page is broken on Safari". Before it writes anything, it goes and finds the actual bug: the file, the line, and the commit that broke it, using `git blame` and `git log -S`. Then it files the issue in a fixed format: symptom, cause, fix, and why the tests didn't catch it. It adds the labels too, and shows you the issue before creating it.
+
+**Why.** "Button does nothing" isn't a ticket. Whoever picks it up, me or an agent, starts from zero. If the digging happens when the ticket is filed, the fix starts from evidence.
+
+<Skill name="tg:pick-ticket" needs={["git", "gh (logged in)", "a browser tool", "worktree, dev and ship scripts", "a dev login route"]}>
+## From ticket to PR
+
+Ask "what's next?" and get a pull request back.
+</Skill>
+
+**What it does.** No issue number? It reads the backlog and suggests three or four tickets that don't touch the same code. Give it a number and it gets its own git worktree, with its own branch, URL and database. It writes a failing test first, fixes the bug and checks it in the browser. Then a script runs the checks, rebases, opens the PR and waits on CI.
+
+**Why.** I run several agents at once. If they share a database, they wreck each other's tests. And it stops at green CI, because merging is my job.
+
+<Skill name="tg:uat" needs={["your app running locally", "a browser tool", "curl and python3 for the helper script"]}>
+## Actually open the browser
+
+Green tests don't mean it works.
+</Skill>
+
+**What it does.** It gets the app into the exact state you need (logged in, event created, a guest who already said yes) with a single API call. Then it opens the page and checks the ticket's acceptance criteria one by one. If they pass, it tags the issue `uat-passed` with the commit it tested.
+
+**Why.** Unit tests check what you thought to test. Someone still has to open the page and look. Now the agent does that part.
+
+<Skill name="tg:ui" needs={["a design system (tokens + components)", "a browser tool (optional)"]}>
+## Use the design system you already have
+
+So the app keeps looking like one app.
+</Skill>
+
+**What it does.** Before writing any UI, it finds your tokens, components and icons, and tells you what it found. Then it builds with those and checks light mode, dark mode and mobile. If you're restyling something that already works, it mocks it up first and leaves the logic alone.
+
+**Why.** Left alone, agents hardcode hex colours and rebuild your Button from scratch. It also keeps a list of AI-looking UI it won't do: gradient cards, a coloured stripe down the side, three accent colours fighting each other.
+
+<Skill name="tg:cleanup" needs={["your typecheck and test scripts"]}>
+## Keep comments honest
+
+For comments that argue with code that isn't there anymore.
+</Skill>
+
+**What it does.** It reads your comments like someone new to the codebase. It flags the ones that mention deleted code, defend a choice against an alternative nobody can see, or put a rule in the wrong place. Then it rewrites them to describe what the code does now.
+
+**Why.** Broken code fails a test. A wrong comment just sits there and gets believed. Agents are really good at leaving those behind after a refactor.
+
+<Skill name="tg:improve-architecture" needs={["gh (logged in)", "Claude Code sub-agents"]}>
+## Fix the code that's painful to change
+
+Find where it hurts, then fix the shape of it.
+</Skill>
+
+**What it does.** It walks the codebase and notes where it hurts: one idea spread over ten files, modules whose interface is as big as what they do, seams with no tests. You pick one. Three or more sub-agents each design a different interface for it, it recommends the best one and files it as a GitHub issue.
+
+**Why.** Deep modules, as John Ousterhout calls them, hide a lot behind a small interface. They're easier to test, and much easier for an agent to find its way around.
+
+<Skill name="tg:copy" needs={["git", "python3", "a native speaker for Greek"]}>
+## Copy that doesn't sound like a bot
+
+Blog posts and marketing pages, in English and Greek.
+</Skill>
+
+**What it does.** It reads your existing posts first to get the voice. It bans the usual suspects ("seamless", "unlock", "dive into") and em dashes, wants one concrete detail per paragraph, and won't make up prices. Greek gets written from scratch, in Greek.
+
+**Why.** Default LLM copy all sounds the same. You can spot it in one line.
+
+<Skill name="tg:greek-review" needs={["python3", "translation JSON files", "your test runner"]}>
+## Greek that doesn't sound translated
+
+For Greek UI that reads like Google Translate.
+</Skill>
+
+**What it does.** It goes through every Greek string: no accents on capitals, sentence case, the informal "you" everywhere, and error messages that say what actually broke. Anything else gets one test: would you type this to a colleague?
+
+**Why.** Translate the English one string at a time and you get Greek that's correct and that nobody actually says.
+
+<Skill name="tg:growth" needs={["gcloud", "a python3 venv", "GA4 service account", "Search Console access", "google-ads.yaml"]}>
+## How's the site doing?
+
+One question covers all three dashboards.
+</Skill>
+
+**What it does.** It queries Google Analytics, Search Console or Google Ads, or all three at once for a "what's working, what's broken, what next" review. It never changes anything. It asks which one you want first, because the full review is slow.
+
+**Why.** Each dashboard shows part of the picture. And it never guesses an account ID, because the wrong ID gives you confident, wrong numbers.
+
+## One config file per repo
+
+The skills don't know anything about your repo. That lives in `.claude/tg.json`: where your design system is, what your labels are called, which scripts create a worktree. If something's missing, the skill works it out from the code and asks before saving it.
+
+```jsonc title=".claude/tg.json"
+{
+  "design": { "tokens": "packages/ui/tokens.css", "themes": ["light", "dark"] },
+  "tickets": { "repo": "you/your-app", "areaPrefix": "project:" }
+}
+```
+
+Want your team's agents working like this? [Let's talk](/#contact).
