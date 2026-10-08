@@ -15,7 +15,7 @@ toc: false
   <SkillGroup>Testing</SkillGroup>
   <SkillRow name="tg:uat" href="#actually-open-the-browser">Opens the browser and checks the thing works.</SkillRow>
   <SkillGroup>Code</SkillGroup>
-  <SkillRow name="tg:ui" href="#use-the-design-system-you-already-have">Uses your design system instead of inventing one.</SkillRow>
+  <SkillRow name="tg:ui" href="#use-the-design-system-you-already-have">Builds with the tokens and components you already have.</SkillRow>
   <SkillRow name="tg:cleanup" href="#keep-comments-honest">Fixes comments that lie about the code.</SkillRow>
   <SkillRow name="tg:improve-architecture" href="#fix-the-code-thats-painful-to-change">Finds the messy modules and proposes better ones.</SkillRow>
   <SkillGroup>Words and numbers</SkillGroup>
@@ -50,14 +50,14 @@ Ask "what's next?" and get a pull request back.
 Green tests don't mean it works.
 </Skill>
 
-**What it does.** It gets the app into the exact state you need (logged in, event created, a guest who already said yes) with one API call instead of twelve clicks. Then it opens the page and checks the ticket's acceptance criteria one by one. If they pass, it tags the issue `uat-passed` with the commit it tested.
+**What it does.** It gets the app into the exact state you need (logged in, event created, a guest who already said yes) with a single API call. Then it opens the page and checks the ticket's acceptance criteria one by one. If they pass, it tags the issue `uat-passed` with the commit it tested.
 
 **Why.** Unit tests check what you thought to test. Someone still has to open the page and look. Now the agent does that part.
 
 <Skill name="tg:ui" needs={["a design system (tokens + components)", "a browser tool (optional)"]}>
 ## Use the design system you already have
 
-Not a new one per screen.
+So the app keeps looking like one app.
 </Skill>
 
 **What it does.** Before writing any UI, it finds your tokens, components and icons, and tells you what it found. Then it builds with those and checks light mode, dark mode and mobile. If you're restyling something that already works, it mocks it up first and leaves the logic alone.
@@ -90,7 +90,7 @@ Find where it hurts, then fix the shape of it.
 Blog posts and marketing pages, in English and Greek.
 </Skill>
 
-**What it does.** It reads your existing posts first to get the voice. It bans the usual suspects ("seamless", "unlock", "dive into") and em dashes, wants one concrete detail per paragraph, and won't make up prices. Greek gets written from scratch, not translated.
+**What it does.** It reads your existing posts first to get the voice. It bans the usual suspects ("seamless", "unlock", "dive into") and em dashes, wants one concrete detail per paragraph, and won't make up prices. Greek gets written from scratch, in Greek.
 
 **Why.** Default LLM copy all sounds the same. You can spot it in one line.
 
@@ -100,14 +100,14 @@ Blog posts and marketing pages, in English and Greek.
 For Greek UI that reads like Google Translate.
 </Skill>
 
-**What it does.** It goes through every Greek string: no accents on capitals, sentence case instead of Title Case, the informal "you" everywhere, and error messages that say what actually broke. Anything else gets one test: would you type this to a colleague?
+**What it does.** It goes through every Greek string: no accents on capitals, sentence case, the informal "you" everywhere, and error messages that say what actually broke. Anything else gets one test: would you type this to a colleague?
 
 **Why.** Translate the English one string at a time and you get Greek that's correct and that nobody actually says.
 
 <Skill name="tg:growth" needs={["gcloud", "a python3 venv", "GA4 service account", "Search Console access", "google-ads.yaml"]}>
 ## How's the site doing?
 
-Ask, instead of opening three dashboards.
+One question covers all three dashboards.
 </Skill>
 
 **What it does.** It queries Google Analytics, Search Console or Google Ads, or all three at once for a "what's working, what's broken, what next" review. It never changes anything. It asks which one you want first, because the full review is slow.

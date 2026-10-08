@@ -1,7 +1,7 @@
 ---
 title: One small cluster for every app I ship
 summary: Hetzner, k3s and Cloudflare Tunnel. No open ports, about €47 a month, and one Terraform block per app.
-description: How I run all my apps on one small Kubernetes cluster on Hetzner, with Cloudflare Tunnel instead of open ports, Terraform onboarding and real monitoring, for about €47 a month.
+description: How I run all my apps on one small Kubernetes cluster on Hetzner, behind Cloudflare Tunnel with no open ports, Terraform onboarding and real monitoring, for about €47 a month.
 date: 2026-10-09
 tags: [infrastructure, kubernetes, cloudflare, terraform]
 draft: true
@@ -14,7 +14,7 @@ So now everything runs on one small Kubernetes cluster. It costs about €47 a m
 <Takeaways>
 - **Nothing connects in.** The cluster dials out to Cloudflare, and requests come back down that connection. No open ports, no certificates, no load balancer.
 - **The platform owns who can reach what. Apps own everything else.** An app's chart, image and CI live in its own repo.
-- **Apps are discovered, never registered.** A new app shows up in logs and metrics by existing, not by being added to a list.
+- **Apps are discovered automatically.** A new app shows up in logs and metrics as soon as it's deployed. There's no list to add it to.
 </Takeaways>
 
 | | |
@@ -112,7 +112,7 @@ module "cluster" {
 }
 ```
 
-Going to three control-plane nodes later is changing `count = 1` to `3`. Growing is a number, not a rewrite.
+Going to three control-plane nodes later means changing `count = 1` to `3` and running `terraform apply`.
 
 > [!WARNING]
 > kube-hetzner turns its built-in load balancer on for single-node clusters, then swaps it for a real Hetzner load balancer (about €6 a month) the moment you add a node. A routine `count` bump would quietly start a new bill. With a tunnel in front, a load balancer has nothing to do, so `enable_klipper_metal_lb = true` is forced on.
@@ -150,7 +150,7 @@ spec:
           args: [tunnel, --no-autoupdate, run]   # the tunnel token comes from a Secret
 ```
 
-The routes aren't in this file. The tunnel keeps its config in Cloudflare, so adding a hostname is an API call, not a redeploy. Anything without a specific route falls through to Traefik, which reads ordinary Kubernetes `Ingress` objects. So an app just ships a normal Ingress.
+The routes aren't in this file. The tunnel keeps its config in Cloudflare, so adding a hostname is one API call and cloudflared keeps running untouched. Anything without a specific route falls through to Traefik, which reads ordinary Kubernetes `Ingress` objects. So an app just ships a normal Ingress.
 
 Two Cloudflare products, two jobs. **Tunnel** is how a request gets in. **Access** is who's allowed to: it puts a login (an emailed code) in front of a hostname, so a designer can see a preview without me creating an account anywhere.
 
@@ -220,7 +220,7 @@ The fix is the same trick as the front door. The runner uses `cloudflared` to op
     kubectl rollout status deploy/portfolio --timeout=180s
 ```
 
-TLS still checks out end to end: the tunnel forwards raw TCP, and `127.0.0.1` is in the API certificate. The `rollout status` line matters too. A deploy whose pods never become ready turns the build red, instead of sitting in a crash loop while CI says everything's fine.
+TLS still checks out end to end: the tunnel forwards raw TCP, and `127.0.0.1` is in the API certificate. The `rollout status` line matters too. If the new pods never become ready, the build goes red. Otherwise a broken deploy could sit in a crash loop while CI reports success.
 
 > [!TIP]
 > Leave the `Namespace` out of what CI applies. `kubectl apply` reads every object before writing it, and a namespace-scoped identity can't read a Namespace. You get a red build *after* the app deployed fine. The namespace is created once, by the onboarding module.
@@ -282,9 +282,9 @@ async function heartbeat(env) {
 }
 ```
 
-It can't say *what* broke. It can only say the whole chain stopped answering, which is the one thing the in-cluster alerts can never say about themselves.
+All it knows is that the whole chain stopped answering. That's also the one thing the in-cluster alerts can never report about themselves.
 
-The same Worker runs a second check every hour: is what's merged on `main` actually running? Between 29 August and 21 September the deploy workflow couldn't reach the cluster, and nothing complained. The cluster kept serving its last good config, so every alert stayed quiet. What was missing was three weeks of changes, not a service. Now the Worker asks GitHub, from outside both, and pings me when they disagree.
+The same Worker runs a second check every hour: is what's merged on `main` actually running? Between 29 August and 21 September the deploy workflow couldn't reach the cluster, and nothing complained. The cluster kept serving its last good config, so every alert stayed quiet. Three weeks of merged changes simply never arrived. Now the Worker asks GitHub, from outside both, and pings me when they disagree.
 
 ## What it doesn't do
 
