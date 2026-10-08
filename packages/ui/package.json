@@ -12,7 +12,7 @@
     "./consent.css": "./consent.css"
   },
   "peerDependencies": {
-    "next": ">=16",
+    "next": "^16.4.0",
     "react": ">=19"
   }
 }
