@@ -1,0 +1,154 @@
+---
+title: Every block this blog can render
+summary: A reference post for writing here. It shows each piece of typography, every code block option and the editorial components, with the syntax for each.
+date: 2026-10-08
+tags: [meta, writing]
+draft: true
+---
+
+<Takeaways>
+- Posts are MDX files in `apps/site/content/blog`. The file name is the URL.
+- Code blocks are rendered at build time by Expressive Code, so readers download no highlighter.
+- `draft: true` keeps a post visible in `next dev` and out of the build.
+</Takeaways>
+
+## Text
+
+Body text is set in Newsreader at a reading measure of about 70 characters; headings and interface text stay in Geist. Quotes are curled automatically, so "this" and 'that' come out right, `--` becomes an en dash -- and `---` becomes an em dash---without typing anything special.
+
+You get **bold**, *italic*, `inline code`, [links](https://gthanasis.com) and ~~strikethrough~~. Keyboard shortcuts use a component: press <Kbd>⌘</Kbd> <Kbd>K</Kbd> to open the palette.
+
+A sidenote sits in the margin on a wide screen and opens inline when tapped on a phone.<Sidenote>Like this one. Use them for asides that are too small for a paragraph and too useful to drop.</Sidenote> Footnotes work too, for references that belong at the end.[^1]
+
+### Lists
+
+1. Pick the issue
+2. Give it its own worktree
+   - its own branch
+   - its own database
+3. Ship it behind tests
+
+- [x] Task lists render as checkboxes
+- [ ] Unchecked ones too
+
+## Callouts
+
+GitHub-style alerts, written as blockquotes:
+
+> [!NOTE]
+> Background the reader might need.
+
+> [!TIP]
+> A better way to do the thing.
+
+> [!IMPORTANT]
+> Something they must not skip.
+
+> [!WARNING]
+> This will bite if ignored.
+
+> [!CAUTION]
+> This is destructive or hard to undo.
+
+A plain blockquote stays quiet:
+
+> Simple things should be simple, complex things should be possible.
+
+## Code
+
+A file with a title, highlighted lines and inline marks:
+
+```ts title="src/lib/retry.ts" {4-6} "attempt"
+export async function retry<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
+  let lastError: unknown
+  for (let attempt = 1; attempt <= tries; attempt++) {
+    try {
+      return await fn()
+    } catch (err) {
+      lastError = err
+      await sleep(2 ** attempt * 100)
+    }
+  }
+  throw lastError
+}
+```
+
+A diff, with added and removed lines:
+
+```ts title="src/lib/queue.ts" del={2} ins={3-4}
+export function enqueue(job: Job) {
+  queue.push(job)
+  if (queue.length >= limit) throw new QueueFullError(limit)
+  queue.push(job)
+}
+```
+
+A terminal:
+
+```bash
+npm run dev:site
+curl -s localhost:3000/blog/feed.xml | head
+```
+
+Line numbers, and a collapsed section for the boring part:
+
+```ts showLineNumbers collapse={1-6}
+import { readdir, readFile } from 'node:fs/promises'
+import path from 'node:path'
+import { cache } from 'react'
+import { evaluate } from '@mdx-js/mdx'
+import remarkGfm from 'remark-gfm'
+import rehypeSlug from 'rehype-slug'
+
+export const getPost = cache(async (slug: string) => {
+  const source = await readFile(path.join(dir, `${slug}.mdx`), 'utf8')
+  return evaluate(source, { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] })
+})
+```
+
+## Editorial blocks
+
+<PullQuote cite="The rule this site is built on">
+  Simple, reliable and tested. In that order.
+</PullQuote>
+
+<Aside title="An aside">
+  A tangent that is worth keeping but should not break the flow of the argument. It is set smaller and quieter than the text around it.
+</Aside>
+
+<Figure caption="A figure with a caption. Wide figures run into the margin." wide>
+  <svg viewBox="0 0 960 200" role="img" aria-label="Three boxes joined by arrows: issue, worktree, merged">
+    <g fill="none" stroke="currentColor" strokeOpacity=".35">
+      <rect x="40" y="60" width="200" height="80" rx="10" />
+      <rect x="380" y="60" width="200" height="80" rx="10" />
+      <rect x="720" y="60" width="200" height="80" rx="10" />
+      <path d="M250 100h120M590 100h120" />
+    </g>
+    <g fill="currentColor" fontFamily="var(--font-mono)" fontSize="16" textAnchor="middle">
+      <text x="140" y="106">issue</text>
+      <text x="480" y="106">worktree</text>
+      <text x="820" y="106">merged</text>
+    </g>
+  </svg>
+</Figure>
+
+## Tables and math
+
+| Block | You write | Rendered by |
+|---|---|---|
+| Callout | `> [!TIP]` | remark-github-blockquote-alert |
+| Footnote | `[^1]` | remark-gfm |
+| Math | `$O(n \log n)$` | KaTeX |
+| Code | a fenced block | Expressive Code |
+
+Inline math like $O(n \log n)$ sits in the line; display math gets its own:
+
+$$
+p_{\text{fail}} = 1 - \prod_{i=1}^{n} (1 - p_i)
+$$
+
+---
+
+That's every block. Copy the syntax from the source of this post.
+
+[^1]: Footnotes collect at the end of the post, with a link back to where they were cited.

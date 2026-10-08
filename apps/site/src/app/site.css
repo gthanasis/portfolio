@@ -11,6 +11,10 @@ a:hover { color: hsl(var(--primary)); }
 .bar nav { display: flex; gap: 22px; }
 .bar nav a { text-decoration: none; color: hsl(var(--muted-foreground)); }
 .bar nav a:hover { color: hsl(var(--foreground)); }
+.bar nav { align-items: center; }
+.bar .nav-sep { color: hsl(var(--border)); user-select: none; }
+/* The smallest phones can't fit every link on one row: wrap, and drop the divider that would end a line. */
+@media (max-width: 374px) { .bar nav { flex-wrap: wrap; } .bar .nav-sep { display: none; } }
 .theme { all: unset; cursor: pointer; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 8px; color: hsl(var(--muted-foreground)); }
 .theme:hover { color: hsl(var(--foreground)); background: hsl(var(--muted)); }
 .theme:focus-visible { outline: 2px solid hsl(var(--ring)); }
@@ -18,6 +22,7 @@ a:hover { color: hsl(var(--primary)); }
   .bar { flex-wrap: wrap; gap: 4px 0; padding: 16px 0 8px; }
   .bar nav { order: 3; width: 100%; gap: 0; margin-left: -10px; }
   .bar nav a { padding: 12px 10px; }
+  .theme { width: 44px; height: 44px; }
 }
 
 /* section frame: title column + content column */
