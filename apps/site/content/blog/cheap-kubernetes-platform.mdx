@@ -1,0 +1,302 @@
+---
+title: One small cluster for every app I ship
+summary: Hetzner, k3s and Cloudflare Tunnel. No open ports, about €47 a month, and one Terraform block per app.
+description: How I run all my apps on one small Kubernetes cluster on Hetzner, with Cloudflare Tunnel instead of open ports, Terraform onboarding and real monitoring, for about €47 a month.
+date: 2026-10-09
+tags: [infrastructure, kubernetes, cloudflare, terraform]
+draft: true
+---
+
+Every side project used to get its own VPS. Its own nginx, its own certs, its own "how did I deploy this again". Five projects in, I had five slightly different setups and no idea which ones were still healthy.
+
+So now everything runs on one small Kubernetes cluster. It costs about €47 a month, has zero open ports, and adding an app is one block of Terraform. Here's how it fits together, with the real config.
+
+<Takeaways>
+- **Nothing connects in.** The cluster dials out to Cloudflare, and requests come back down that connection. No open ports, no certificates, no load balancer.
+- **The platform owns who can reach what. Apps own everything else.** An app's chart, image and CI live in its own repo.
+- **Apps are discovered, never registered.** A new app shows up in logs and metrics by existing, not by being added to a list.
+</Takeaways>
+
+| | |
+|---|---|
+| Cloud | Hetzner, Falkenstein |
+| Cluster | k3s via kube-hetzner: one control plane (4 vCPU / 8 GB), two app nodes (8 vCPU / 16 GB) |
+| Way in | Cloudflare Tunnel, with Cloudflare Access for logins |
+| Metrics and logs | Prometheus, Loki, Alloy, Grafana |
+| Terraform state | Cloudflare R2 |
+| Cost | about €47 a month before VAT |
+
+## The shape
+
+Here's the whole thing. Requests go left to right along the top; everything below is how I see what's happening.
+
+<Figure caption="Top: the only way in, through a tunnel cloudflared opened from inside. Middle: logs. Bottom: metrics, and the heartbeat that lives outside the cluster it watches." wide>
+  <svg viewBox="0 0 960 340" role="img" aria-label="Diagram. Top row: a visitor goes through Cloudflare Access and Tunnel to cloudflared, Traefik and the apps inside the Hetzner k3s cluster. Middle row: Alloy collects the apps' logs into Loki, shown in Grafana. Bottom row: Prometheus scrapes metrics into Grafana and pings a heartbeat Worker that runs on Cloudflare, outside the cluster.">
+    <g fill="none" stroke="currentColor" strokeOpacity=".3" strokeDasharray="4 4">
+      <rect x="160" y="20" width="260" height="300" rx="12" />
+      <rect x="450" y="20" width="490" height="300" rx="12" />
+    </g>
+    <g fill="none" stroke="currentColor" strokeOpacity=".4">
+      <rect x="20" y="70" width="110" height="46" rx="8" />
+      <rect x="180" y="70" width="100" height="46" rx="8" />
+      <rect x="300" y="70" width="100" height="46" rx="8" />
+      <rect x="470" y="70" width="120" height="46" rx="8" />
+      <rect x="620" y="70" width="100" height="46" rx="8" />
+      <rect x="750" y="70" width="170" height="46" rx="8" />
+      <rect x="470" y="170" width="120" height="46" rx="8" />
+      <rect x="620" y="170" width="100" height="46" rx="8" />
+      <rect x="750" y="170" width="170" height="46" rx="8" />
+      <rect x="610" y="255" width="120" height="46" rx="8" />
+      <rect x="180" y="255" width="220" height="46" rx="8" />
+      <path d="M130 93h50M280 93h20M400 93h70M590 93h30M720 93h30" />
+      <path d="M590 193h30M720 193h30M730 278h105v-62" />
+      <path d="M835 116v22H530v32" strokeDasharray="3 4" />
+      <path d="M610 278H400" strokeDasharray="3 4" />
+    </g>
+    <g fill="currentColor" fontFamily="var(--font-mono)" fontSize="15" textAnchor="middle">
+      <text x="75" y="98">visitor</text>
+      <text x="290" y="48" fillOpacity=".55">Cloudflare</text>
+      <text x="230" y="98">Access</text>
+      <text x="350" y="98">Tunnel</text>
+      <text x="695" y="48" fillOpacity=".55">Hetzner · k3s</text>
+      <text x="530" y="98">cloudflared</text>
+      <text x="670" y="98">Traefik</text>
+      <text x="835" y="98">apps</text>
+      <text x="530" y="198">Alloy</text>
+      <text x="670" y="198">Loki</text>
+      <text x="835" y="198">Grafana</text>
+      <text x="670" y="283">Prometheus</text>
+      <text x="290" y="283">heartbeat Worker</text>
+    </g>
+    <g fill="currentColor" fillOpacity=".55" fontFamily="var(--font-mono)" fontSize="12" textAnchor="middle">
+      <text x="682" y="151">logs</text>
+      <text x="530" y="270">ping every minute</text>
+    </g>
+  </svg>
+</Figure>
+
+Grafana sits behind Access too, at its own hostname. Same route as any app.
+
+## The cluster is one Terraform module
+
+I didn't hand-roll k3s. [kube-hetzner](https://github.com/kube-hetzner/terraform-hcloud-kube-hetzner) is a Terraform module that builds the servers, the network, the firewall and the cluster, on an OS that patches itself. My config is mostly a list of nodes:
+
+```hcl title="terraform/main.tf (trimmed)" {16,19-27}
+module "cluster" {
+  source  = "kube-hetzner/kube-hetzner/hcloud"
+  version = "3.2.1"
+
+  control_plane_nodepools = [
+    { name = "control", server_type = "cx33", location = "fsn1", count = 1, labels = [], taints = [] }
+  ]
+  agent_nodepools = [
+    { name = "agent", server_type = "cx43", location = "fsn1", count = 2, labels = [], taints = [] }
+  ]
+
+  ingress_controller = "traefik"
+  enable_cert_manager = false   # TLS ends at Cloudflare
+
+  # Never let a Hetzner load balancer appear (see below).
+  enable_klipper_metal_lb = true
+
+  # The only traffic the firewall needs to allow is cloudflared dialling out.
+  extra_firewall_rules = [
+    {
+      description     = "cloudflared -> Cloudflare edge (QUIC)"
+      direction       = "out"
+      protocol        = "udp"
+      port            = "7844"
+      destination_ips = ["0.0.0.0/0", "::/0"]
+    },
+  ]
+}
+```
+
+Going to three control-plane nodes later is changing `count = 1` to `3`. Growing is a number, not a rewrite.
+
+> [!WARNING]
+> kube-hetzner turns its built-in load balancer on for single-node clusters, then swaps it for a real Hetzner load balancer (about €6 a month) the moment you add a node. A routine `count` bump would quietly start a new bill. With a tunnel in front, a load balancer has nothing to do, so `enable_klipper_metal_lb = true` is forced on.
+
+<Aside title="Why Hetzner and not DigitalOcean">
+  Roughly half the price for the same VM class. And managed Kubernetes runs its own system pods on every node: about 520m CPU and 630Mi before any app starts. On a small node that's a quarter of the CPU gone. k3s uses about half that. The catch is real: upgrades, etcd backups and node replacement become my job.
+</Aside>
+
+## No open ports
+
+Journey one: a request.
+
+Normally you'd point DNS at a server, open 443 and manage certificates. Here, a small program called `cloudflared` runs inside the cluster and opens an outbound connection to Cloudflare. Requests for my hostnames travel back down that connection. Nothing on the internet can start a connection to the node, because nothing is listening.
+
+```yaml title="platform/cloudflare/cloudflared.yaml (trimmed)" {7,20}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: cloudflare
+spec:
+  replicas: 2   # one restarting never drops every route
+  template:
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector: { matchLabels: { app.kubernetes.io/name: cloudflared } }
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2026.8.2
+          args: [tunnel, --no-autoupdate, run]   # the tunnel token comes from a Secret
+```
+
+The routes aren't in this file. The tunnel keeps its config in Cloudflare, so adding a hostname is an API call, not a redeploy. Anything without a specific route falls through to Traefik, which reads ordinary Kubernetes `Ingress` objects. So an app just ships a normal Ingress.
+
+Two Cloudflare products, two jobs. **Tunnel** is how a request gets in. **Access** is who's allowed to: it puts a login (an emailed code) in front of a hostname, so a designer can see a preview without me creating an account anywhere.
+
+> [!CAUTION]
+> These are separate steps. A hostname routed through the tunnel is public until an Access policy exists for it. Skip the second step and the app is open to anyone who guesses the name.
+
+## Adding an app is one block
+
+Journey two: shipping something.
+
+An app lives in its own repo with its own Dockerfile, manifests and CI. The infra repo only decides the things that were never the app's call: its namespace, what its CI may touch, its hostname and who can open it. That's one module block per app:
+
+```hcl title="terraform/apps.tf"
+module "portfolio" {
+  source = "./modules/app-onboarding"
+
+  name = "portfolio"
+  repo = "gthanasis/portfolio"
+  tier = "app"
+
+  # Public on purpose: it's a portfolio. Leave access_emails empty only when that's true.
+  hostname = "gthanasis.com"
+  zone_id  = local.zones["gthanasis.com"]
+
+  cloudflare_account_id = local.cloudflare_account_id
+  tunnel_id             = local.tunnel_id
+}
+```
+
+`terraform apply` turns that into:
+
+- a **namespace**, labelled so the network policies and security scans know it's an app
+- a **CI identity** that can deploy into that namespace and nothing else. It can't read secrets, and it can't see other apps.
+- a **Cloudflare service token** that lets that app's CI, and only that app's CI, through to the cluster API
+- a **DNS record** pointing the hostname at the tunnel
+- an **Access application** with the allowed emails, when the app isn't public
+
+A script then pipes the credentials straight into the app repo's GitHub secrets. Nothing is printed, because anything echoed to a terminal lives on in scrollback and history.
+
+<PullQuote>
+  Apps own their code, image and rollout. The platform owns who can reach what.
+</PullQuote>
+
+## Deploying from CI without exposing the API
+
+The cluster API isn't on the internet either. That's a problem for GitHub Actions: runners have no fixed IP to allow through a firewall.
+
+The fix is the same trick as the front door. The runner uses `cloudflared` to open an authenticated tunnel to the API, using its service token, and talks to it on localhost:
+
+```yaml title=".github/workflows/deploy.yml (trimmed)"
+- name: Open a tunnel to the cluster API
+  env:
+    TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+    TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+  run: |
+    ./cloudflared access tcp --hostname "$CLUSTER_HOSTNAME" --url 127.0.0.1:6443 \
+      --service-token-id "$TUNNEL_SERVICE_TOKEN_ID" \
+      --service-token-secret "$TUNNEL_SERVICE_TOKEN_SECRET" &
+    for i in $(seq 1 30); do nc -z 127.0.0.1 6443 && exit 0; sleep 1; done
+    exit 1
+
+- name: Deploy
+  run: |
+    kubectl config set-cluster pilot --server=https://127.0.0.1:6443 --certificate-authority=ca.crt
+    kubectl config set-credentials ci --token="$KUBE_TOKEN"
+    kubectl apply -k deploy/k8s
+    kubectl rollout status deploy/portfolio --timeout=180s
+```
+
+TLS still checks out end to end: the tunnel forwards raw TCP, and `127.0.0.1` is in the API certificate. The `rollout status` line matters too. A deploy whose pods never become ready turns the build red, instead of sitting in a crash loop while CI says everything's fine.
+
+> [!TIP]
+> Leave the `Namespace` out of what CI applies. `kubectl apply` reads every object before writing it, and a namespace-scoped identity can't read a Namespace. You get a red build *after* the app deployed fine. The namespace is created once, by the onboarding module.
+
+## Seeing everything without registering anything
+
+Nothing in the infra repo holds a list of apps. Prometheus watches every namespace. Alloy tails every container on every node. Grafana loads dashboards from every namespace. An app becomes visible by existing.
+
+What an app does to get good data out is mostly labels:
+
+```yaml title="deployment.yaml"
+template:
+  metadata:
+    labels:
+      app.kubernetes.io/name: portfolio   # logs now say app="portfolio"
+```
+
+If it exposes metrics, a `ServiceMonitor` in its own namespace is picked up automatically. If it ships a dashboard, a ConfigMap labelled `grafana_dashboard: "1"` is loaded. Logs need nothing at all: the moment a pod starts, `{namespace="portfolio"}` works in Grafana.
+
+Severity gets pulled out of each line once, when it's collected, and stored as a label. Grafana can then colour rows and filter by level without searching text. Any of these formats works:
+
+| Format | Example |
+|---|---|
+| logfmt | `level=error msg="payment failed"` |
+| JSON | `{"level":"warn","msg":"retrying"}` |
+| bracketed | `[ERROR] connection reset` |
+
+A line that merely contains the word "error" is labelled `unknown`, which is the right answer. An earlier version read the level out of a startup banner that said `Log level: info`.
+
+## Knowing when it's down
+
+Journey three: something breaks.
+
+Alert rules run in Prometheus and Alertmanager sends them to Telegram. Pods crash-looping, a disk filling up, a backup that hasn't succeeded in a day, a new critical CVE with a fix in a public app's image.
+
+There's a hole in that, though. Prometheus runs on the same cluster it's watching. If the cluster goes down, the thing that would tell me goes down with it, and silence looks exactly like everything being fine. On 28 August that silence lasted 6 hours 41 minutes.
+
+<PullQuote cite="from the heartbeat's own comments">
+  Nothing inside the cluster can close that gap, because the gap is the cluster.
+</PullQuote>
+
+So the last check lives outside it. Alertmanager has an alert that's always firing, on purpose, and sends it every minute to a small Cloudflare Worker. The Worker remembers when the last one arrived and checks every five minutes:
+
+```js title="platform/heartbeat/worker.js (trimmed)"
+async function heartbeat(env) {
+  const now = nowSeconds()
+  const staleAfter = Number(env.STALE_AFTER_SECONDS ?? 300)
+  const last = Number((await env.HEARTBEAT.get('last-ping')) ?? 0)
+  if (!last) return // never pinged: a fresh deploy hasn't lost anything yet
+
+  const outageSince = Number((await env.HEARTBEAT.get('outage-since')) ?? 0)
+  const age = now - last
+
+  if (age > staleAfter && !outageSince) {
+    const sent = await notify(env, `Cluster heartbeat lost. No ping for ${duration(age)}.`)
+    // Only remember the outage once the message actually went out.
+    if (sent) await env.HEARTBEAT.put('outage-since', String(last))
+  }
+}
+```
+
+It can't say *what* broke. It can only say the whole chain stopped answering, which is the one thing the in-cluster alerts can never say about themselves.
+
+The same Worker runs a second check every hour: is what's merged on `main` actually running? Between 29 August and 21 September the deploy workflow couldn't reach the cluster, and nothing complained. The cluster kept serving its last good config, so every alert stayed quiet. What was missing was three weeks of changes, not a service. Now the Worker asks GitHub, from outside both, and pings me when they disagree.
+
+## What it doesn't do
+
+It's a small setup and it has real gaps. I'd rather know them than find them.
+
+| Gap | What it means |
+|---|---|
+| One control-plane node | Apps can move between the two app nodes, but if the control plane dies, nothing can be scheduled or changed until it's back. Fine for side projects and previews. Before anything here earns money, it goes to three. |
+| Terraform runs from my laptop | App deploys are automated. Changes to the platform itself are still a local `terraform apply`. |
+| Admin access is IP-allowlisted | SSH and the kube API accept one address. A new home IP locks me out until I update it. |
+| It's self-managed | Upgrades, etcd backups and replacing a dead node are my job. That's the real price behind the €47. |
+
+For what I run on it, that trade is worth it. One place to deploy, one place to look, and nothing listening on the internet.
+
+Want something like this for your team? [Let's talk](/#contact).

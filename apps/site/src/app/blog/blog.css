@@ -154,6 +154,8 @@
 .fig svg { padding: 12px; }
 .fig figcaption { margin-top: .8em; font: .78rem/1.5 var(--font-mono), monospace; color: hsl(var(--muted-foreground)); }
 .fig.wide { width: min(calc(var(--measure) + var(--sn-gap) + var(--sn-w)), 100%); max-width: none; }
+/* A wide diagram shrunk to a phone's width has unreadable text: keep it legible and let it scroll in its frame. */
+@media (max-width: 640px) { .fig.wide:has(> svg) { overflow-x: auto; } .fig.wide > svg { min-width: 720px; } }
 @media (min-width: 1100px) { .prose .fig.wide { width: calc(var(--measure) + var(--sn-gap) + var(--sn-w)); } }
 
 /* sidenotes: margin on wide screens, tap-to-expand inline on narrow ones (no JS) */

@@ -31,7 +31,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       tags: post.tags,
     },
     twitter: { card: 'summary_large_image', title: post.title, description: post.description },
-    robots: post.draft ? { index: false, follow: false } : undefined,
+    // Spelled out for published posts too: `undefined` here would drop the site's defaults, not inherit them.
+    robots: post.draft
+      ? { index: false, follow: false }
+      : { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
   }
 }
 
