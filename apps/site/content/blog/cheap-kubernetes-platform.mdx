@@ -2,9 +2,9 @@
 title: One small cluster for every app I ship
 summary: Hetzner, k3s and Cloudflare Tunnel. No open ports, about €47 a month, and one Terraform block per app.
 description: How I run all my apps on one small Kubernetes cluster on Hetzner, behind Cloudflare Tunnel with no open ports, Terraform onboarding and real monitoring, for about €47 a month.
-date: 2026-10-09
+date: 2026-10-08
 tags: [infrastructure, kubernetes, cloudflare, terraform]
-draft: true
+draft: false
 ---
 
 Every side project used to get its own VPS. Its own nginx, its own certs, its own "how did I deploy this again". Five projects in, I had five slightly different setups and no idea which ones were still healthy.
@@ -84,7 +84,7 @@ I didn't hand-roll k3s. [kube-hetzner](https://github.com/kube-hetzner/terraform
 ```hcl title="terraform/main.tf (trimmed)" {16,19-27}
 module "cluster" {
   source  = "kube-hetzner/kube-hetzner/hcloud"
-  version = "3.2.1"
+  version = "x.y.z"   # pin it
 
   control_plane_nodepools = [
     { name = "control", server_type = "cx33", location = "fsn1", count = 1, labels = [], taints = [] }
@@ -146,7 +146,7 @@ spec:
                 labelSelector: { matchLabels: { app.kubernetes.io/name: cloudflared } }
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:2026.8.2
+          image: cloudflare/cloudflared:<pinned version>
           args: [tunnel, --no-autoupdate, run]   # the tunnel token comes from a Secret
 ```
 
@@ -293,8 +293,8 @@ It's a small setup and it has real gaps. I'd rather know them than find them.
 | Gap | What it means |
 |---|---|
 | One control-plane node | Apps can move between the two app nodes, but if the control plane dies, nothing can be scheduled or changed until it's back. Fine for side projects and previews. Before anything here earns money, it goes to three. |
-| Terraform runs from my laptop | App deploys are automated. Changes to the platform itself are still a local `terraform apply`. |
-| Admin access is IP-allowlisted | SSH and the kube API accept one address. A new home IP locks me out until I update it. |
+| Platform changes are applied by hand | App deploys are automated. Changes to the platform itself are still a manual `terraform apply`. |
+| Admin access uses an IP allowlist | SSH and the kube API accept a fixed allowlist, which I update by hand when it needs to change. |
 | It's self-managed | Upgrades, etcd backups and replacing a dead node are my job. That's the real price behind the €47. |
 
 For what I run on it, that trade is worth it. One place to deploy, one place to look, and nothing listening on the internet.
