@@ -1,7 +1,10 @@
 {
   "name": "gthanasis",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev:site": "npm run dev -w site",
     "dev:cv": "npm run dev -w cv",
@@ -9,5 +12,10 @@
     "typecheck": "npm run typecheck -w site && npm run typecheck -w cv",
     "lint": "npm run lint -w site && npm run lint -w cv"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  },
+  "overrides": {
+    "katex": "^0.18.2"
+  }
 }
