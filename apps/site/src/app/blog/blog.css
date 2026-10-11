@@ -154,7 +154,7 @@
 .fig { margin-left: 0; margin-right: 0; }
 .fig img, .fig svg { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid hsl(var(--border)); background: hsl(var(--card)); }
 .fig svg { padding: 12px; }
-.fig video { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid hsl(var(--border)); background: hsl(var(--card)); }
+.fig video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; border: 1px solid hsl(var(--border)); background: hsl(var(--card)); }
 .fig figcaption { margin-top: .8em; font: .78rem/1.5 var(--font-mono), monospace; color: hsl(var(--muted-foreground)); }
 .fig.wide { width: 100%; max-width: none; }
 /* <Parts>: small screenshots side by side at their real size */

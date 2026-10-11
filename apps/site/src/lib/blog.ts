@@ -1,4 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
@@ -109,8 +110,15 @@ function parseMeta(slug: string, fm: unknown, source: string): PostMeta {
     showToc: m.toc !== false,
     readingMinutes: Math.max(1, Math.round(words / 230)),
     cover: m.image ? { src: String(m.image), alt: m.imageAlt ? String(m.imageAlt) : '' } : undefined,
-    image: m.image ? { src: String(m.image), alt: m.imageAlt ? String(m.imageAlt) : '' } : firstImage(source),
+    image: webpSibling(m.image ? { src: String(m.image), alt: m.imageAlt ? String(m.imageAlt) : '' } : firstImage(source)),
   }
+}
+
+// Lists show the .webp next to a .jpg/.png cover when there is one (the original stays for link previews).
+function webpSibling(img: PostMeta['image']): PostMeta['image'] {
+  if (!img || !/\.(jpe?g|png)$/i.test(img.src) || !img.src.startsWith('/')) return img
+  const webp = img.src.replace(/\.(jpe?g|png)$/i, '.webp')
+  return existsSync(path.join(process.cwd(), 'public', webp)) ? { ...img, src: webp } : img
 }
 
 // The first <Figure src>, <img src> or markdown image in the post body.

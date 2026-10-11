@@ -3,6 +3,7 @@ import type { MDXComponents } from 'mdx/types'
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { renderCode } from '@/lib/code'
+import { ClipVideo } from './ClipVideo'
 import { SkillSourceToggle } from './SkillSourceToggle'
 
 // Blocks available in every post without importing them.
@@ -17,11 +18,11 @@ export function Parts({ caption, children }: { caption?: ReactNode; children: Re
   )
 }
 
-/** Short silent screen recording that plays and loops like a GIF, at a fraction of the size. */
+/** Short silent screen recording that loops like a GIF: AV1 with an MP4 fallback, loaded when scrolled to. */
 export function Clip({ src, caption, label, wide }: { src: string; caption?: ReactNode; label: string; wide?: boolean }) {
   return (
     <figure className={`fig clip${wide ? ' wide' : ''}`}>
-      <video src={src} autoPlay muted loop playsInline preload="auto" aria-label={label} />
+      <ClipVideo src={src} label={label} />
       {caption && <figcaption>{caption}</figcaption>}
     </figure>
   )
