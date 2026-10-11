@@ -4,7 +4,7 @@ import { site } from '@/lib/site'
 export function Footer() {
   return (
     <footer>
-      <span>{site.name}, Athens</span>
+      <span>{site.name}</span>
       <nav aria-label="Profiles">
         <a href={site.cv}>CV</a>
         <a href={site.github} rel="me">

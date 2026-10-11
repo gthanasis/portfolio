@@ -1,4 +1,4 @@
-import { Children, isValidElement, useId, type ComponentProps, type ReactNode } from 'react'
+import { Children, isValidElement, type ComponentProps, type ReactNode } from 'react'
 import type { MDXComponents } from 'mdx/types'
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -7,16 +7,30 @@ import { SkillSourceToggle } from './SkillSourceToggle'
 
 // Blocks available in every post without importing them.
 
-/** Numbered note in the right margin on wide screens; tap the number to open it inline on narrow ones. */
-export function Sidenote({ children }: { children: ReactNode }) {
-  const id = useId()
+/** Small UI screenshots side by side at their real size (e.g. a tag next to its card), with one caption. */
+export function Parts({ caption, children }: { caption?: ReactNode; children: ReactNode }) {
   return (
-    <>
-      <label htmlFor={id} className="sn-ref" aria-label="Show sidenote" />
-      <input type="checkbox" id={id} className="sn-toggle" />
-      <small className="sidenote">{children}</small>
-    </>
+    <figure className="fig parts">
+      <div className="parts-row">{children}</div>
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
   )
+}
+
+/** Short silent screen recording that plays and loops like a GIF, at a fraction of the size. */
+export function Clip({ src, caption, label, wide }: { src: string; caption?: ReactNode; label: string; wide?: boolean }) {
+  return (
+    <figure className={`fig clip${wide ? ' wide' : ''}`}>
+      <video src={src} autoPlay muted loop playsInline preload="auto" aria-label={label} />
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
+  )
+}
+
+/** One screenshot inside <Parts>. `width` is its on-screen width in CSS pixels (the file is usually 2x). */
+export function Part({ src, alt, width }: { src: string; alt: string; width: number }) {
+  // eslint-disable-next-line @next/next/no-img-element -- static export serves images as files
+  return <img src={src} alt={alt} width={width} style={{ width }} loading="lazy" />
 }
 
 /** The one line a reader should remember. */
@@ -143,8 +157,10 @@ function Table(props: ComponentProps<'table'>) {
 }
 
 export const mdxComponents: MDXComponents = {
-  Sidenote,
   PullQuote,
+  Parts,
+  Clip,
+  Part,
   Figure,
   Takeaways,
   Aside,

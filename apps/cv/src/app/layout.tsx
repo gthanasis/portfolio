@@ -12,7 +12,7 @@ const sans = Geist({ subsets: ['latin'], variable: '--font-sans', display: 'swap
 const mono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' })
 
 const title = `${person.name} | CV, ${person.role}`
-const description = `CV of ${person.name}, ${person.role} at ${person.employer} in Athens. Ten years building distributed systems, event-driven platforms and production AI, now through agentic coding.`
+const description = `CV of ${person.name}, ${person.role} at ${person.employer}. Ten years building distributed systems, event-driven platforms and production AI, now through agentic coding.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(person.url),
@@ -50,10 +50,9 @@ const jsonLd = {
     description: summary,
     worksFor: { '@type': 'Organization', name: person.employer, url: 'https://n8n.io' },
     alumniOf: { '@type': 'CollegeOrUniversity', name: 'Ionian University' },
-    address: { '@type': 'PostalAddress', addressLocality: 'Athens', addressCountry: 'GR' },
     email: `mailto:${person.email}`,
     sameAs: [person.web, person.github, person.linkedin],
-    hasOccupation: jobs.map((j) => ({ '@type': 'Occupation', name: j.title, occupationLocation: { '@type': 'City', name: 'Athens' }, description: `${j.org}, ${j.from} to ${j.to}` })),
+    hasOccupation: jobs.map((j) => ({ '@type': 'Occupation', name: j.title, description: `${j.org}, ${j.from} to ${j.to}` })),
   },
 }
 

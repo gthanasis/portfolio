@@ -73,6 +73,8 @@ export default async function BlogIndex() {
                     {p.readingMinutes} min read{p.tags.length > 0 && ` · ${p.tags.join(', ')}`}
                   </span>
                 </div>
+                {/* eslint-disable-next-line @next/next/no-img-element -- static export serves images as files */}
+                <img className="post-thumb" src={p.image?.src ?? `/blog/${p.slug}/opengraph-image`} alt={p.image?.alt ?? ''} loading="lazy" />
               </Link>
             </li>
           ))}

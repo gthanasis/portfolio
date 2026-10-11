@@ -1,0 +1,396 @@
+---
+title: Modern Home Assistant Dashboard
+summary: Overloading Home Assistant to make it look and feel like a premium home automation platform.
+date: 2026-10-11
+tags: [home assistant, raspberry pi, react]
+image: /blog/home-assistant-pi/overview.jpg
+imageAlt: "The custom Home Assistant overview: greeting with the family's photos, tags for power, weather, lights and the electricity price, scene buttons, light toggles, and summary cards for energy, the TV, the vacuum, the weather, the house and the Raspberry Pi."
+draft: false
+---
+
+## Buying and setting up the Pi
+
+I'd been thinking about buying a Raspberry Pi for a long time, partly to fiddle around with it and partly to have an always-on computer in the house. I finally did, and the first thing I set up on it was Home Assistant.
+
+<Figure src="/blog/home-assistant-pi/raspberry-pi.jpg" alt="A Raspberry Pi 5 with the official Active Cooler fan and heatsink, on a bamboo desk, with a USB-C power cable plugged in." caption="The Raspberry Pi 5, with the official Active Cooler." />
+
+A home hub was the other option, and for me it wasn't worth it. A HomePod costs around €200, while a Raspberry Pi costs less and can run a bunch of other things at the same time.
+
+So I bought one and flashed it with Raspberry Pi OS Lite, the version without a desktop, with SSH turned on so I could manage it from my laptop. You can find the [instructions here](https://www.raspberrypi.com/documentation/computers/getting-started.html#raspberry-pi-imager).
+
+## The devices I already had
+
+I didn't have a lot of smart stuff around the house, but I had enough to start with:
+
+<ul style={{ listStyle: "none", padding: 0, display: "grid", gap: 18 }}>
+  <li style={{ display: "flex", alignItems: "center", gap: 18, margin: 0 }}>
+    <img src="/blog/home-assistant-pi/devices/hue-bridge.png" alt="Philips Hue Bridge" loading="lazy" style={{ width: 64, height: 64, objectFit: "contain", flex: "none", background: "none", border: 0, borderRadius: 0, boxShadow: "none", margin: 0 }} />
+    <span><strong>A Philips Hue Bridge</strong> with a couple of Hue bulbs.</span>
+  </li>
+  <li style={{ display: "flex", alignItems: "center", gap: 18, margin: 0 }}>
+    <img src="/blog/home-assistant-pi/devices/ikea-bulb.png" alt="IKEA TRÅDFRI E14 colour bulb" loading="lazy" style={{ width: 64, height: 64, objectFit: "contain", flex: "none", background: "none", border: 0, borderRadius: 0, boxShadow: "none", margin: 0 }} />
+    <span><strong>An IKEA colour bulb</strong>, paired to the same bridge. Getting an IKEA bulb into Hue takes a little hacking: you reset the bulb by flicking the switch six times while the Hue app searches for lights. <a href="https://www.androidauthority.com/add-ikea-tradfri-lights-philips-hue-1211149/">Here's a good walkthrough</a>.</span>
+  </li>
+  <li style={{ display: "flex", alignItems: "center", gap: 18, margin: 0 }}>
+    <img src="/blog/home-assistant-pi/devices/samsung-tv.png" alt="Samsung smart TV" loading="lazy" style={{ width: 64, height: 64, objectFit: "contain", flex: "none", background: "none", border: 0, borderRadius: 0, boxShadow: "none", margin: 0 }} />
+    <span><strong>A Samsung smart TV.</strong></span>
+  </li>
+  <li style={{ display: "flex", alignItems: "center", gap: 18, margin: 0 }}>
+    <img src="/blog/home-assistant-pi/devices/meross-plug.png" alt="Meross Matter smart plug" loading="lazy" style={{ width: 64, height: 64, objectFit: "contain", flex: "none", background: "none", border: 0, borderRadius: 0, boxShadow: "none", margin: 0 }} />
+    <span><strong>Three Meross Matter smart plugs.</strong> I'd bought them without really knowing what to do with them. In the end, one went on the fridge so I can see how much power it uses, and the other two on two living room lights that weren't smart.</span>
+  </li>
+  <li style={{ display: "flex", alignItems: "center", gap: 18, margin: 0 }}>
+    <img src="/blog/home-assistant-pi/devices/dreame-d10-plus.png" alt="Dreame D10 Plus robot vacuum with its auto-empty base" loading="lazy" style={{ width: 64, height: 64, objectFit: "contain", flex: "none", background: "none", border: 0, borderRadius: 0, boxShadow: "none", margin: 0 }} />
+    <span><strong>A Dreame D10 Plus robot vacuum</strong>, which at some point I decided to call Tim.</span>
+  </li>
+  <li style={{ display: "flex", alignItems: "center", gap: 18, margin: 0 }}>
+    <img src="/blog/home-assistant-pi/devices/home-assistant.png" alt="Home Assistant app icon" loading="lazy" style={{ width: 64, height: 64, padding: 8, boxSizing: "border-box", objectFit: "contain", flex: "none", background: "none", border: 0, borderRadius: 0, boxShadow: "none", margin: 0 }} />
+    <span><strong>My iPhone</strong> with the Home Assistant app, so the house knows when I'm home.</span>
+  </li>
+</ul>
+
+## A custom dashboard with Home Assistant and React
+
+Home Assistant comes with a pretty decent default overview page, but it's nowhere close to what I like seeing and interacting with.
+
+<Figure src="/blog/home-assistant-pi/before.jpg" alt="Home Assistant's default auto-generated overview: one card per room listing every entity, with toggles for lights, energy and power readings, vacuum settings as dropdowns, and photos of the people." caption="Before: the overview Home Assistant generates on its own." wide />
+
+So I sat down with Claude and started working on a couple of custom views. We went from this to this:
+
+<Figure src="/blog/home-assistant-pi/overview.jpg" alt="The custom Home Assistant overview: a greeting with the family's photos, a strip of tags for power, weather, lights and the electricity price, six scene buttons, quick light toggles, and summary tiles for energy, the TV, the vacuum, the weather, the house and the Raspberry Pi." caption="After: the overview I open every day." wide />
+
+First, I installed a few things:
+
+- **[HACS](https://hacs.xyz)**, the Home Assistant Community Store. It's where most custom cards and integrations come from.
+- **[Mushroom](https://github.com/piitaya/lovelace-mushroom)**, a set of clean cards from HACS. I used it to rebuild my old dashboard before replacing it with my own.
+- **[Dreame Vacuum](https://github.com/Tasshack/dreame-vacuum)**, also from HACS, which gives Home Assistant the vacuum's live map, rooms and maintenance sensors.
+- **[Powercalc](https://github.com/bramstroker/homeassistant-powercalc)**, which estimates the power use of lights that can't measure it themselves, so every light shows up in the energy numbers.
+- **The Matter Server**, which connects the Meross plugs to Home Assistant directly, without the Meross cloud.
+
+Then I started working on custom components, to make sure everything looks the way I want and is mobile-friendly, interactive and fast.
+
+The overview is built from four kinds of pieces. **Tags** under the greeting give condensed information. **Scenes** are quick actions. The **lights** are one-tap switches. And the **At a glance** cards each cover one topic. Tapping a tag or a card opens a page with the details. Here's each part.
+
+<Figure src="/blog/home-assistant-pi/tags.jpg" alt="The greeting and a strip of four tags: power with a small graph, 25 degrees and rainy, 1 light on, and Reduced till 15:00." caption="The tags under the greeting." />
+
+### Scenes and lights
+
+The scenes are the things I actually use, quick actions for the moment I open the dashboard: Sleep timer, Movie time, Evening, Good night, All off, and Clean, which sends the vacuum out. A scene lights up when the house matches it, so I can see at a glance that Good night is already on.
+
+<Figure src="/blog/home-assistant-pi/scenes.jpg" alt="Six scene buttons: Sleep timer, Movie time, Evening, Good night, All off and Clean, each with a short description." caption="The scenes, one tap each." />
+
+All the lights are quickly accessible too. Tap a light to switch it on or off. The lights tag shows how many are on.
+
+<Figure src="/blog/home-assistant-pi/lights-tiles.jpg" alt="Light toggles: Light stand, Dining light at 80% with a brightness bar, Laundry lamp, TV string lights, Donut light, Bedroom lamp unavailable, and a fridge tile marked Protected." caption="Quick light toggles, with a status-only tile for the fridge." />
+
+Press and hold a light, or tap All rooms, and the Lights page opens. Each room gets one switch and one slider for all its lights, every light has its own brightness slider or plug switch, and colour bulbs get a row of colour presets. Next to them are the light automations, each with its own on/off switch.
+
+<Figure src="/blog/home-assistant-pi/lights-page.jpg" alt="The Lights page: a Living room card with a room switch, a brightness slider and five lights, a Bedroom card, a list of light automations with switches, and an Up next list." caption="The Lights page." wide />
+
+### Who's home
+
+I wanted a way to see who's currently in the house, with a little information about each person. Their photos sit next to the greeting, with a green ring when they're home. Tap them and the Family page shows where each person is, whether they're inside the house or not, their phone's battery level and the Wi-Fi it's connected to.
+
+<Figure src="/blog/home-assistant-pi/people.jpg" alt="Two family cards: Thanasis, home for 11 hours with the phone at 15% battery, and Vera, with no phone linked yet." caption="The Family page. A map underneath shows where everyone is." />
+
+### Energy
+
+Energy has two tags, one for how many watts the house is using right now with a tiny graph of the last 24 hours, and one for the power rate: whether electricity is at the cheap or the normal rate, and until when. Its card shows what the house has used today and what that has cost.
+
+<Parts caption="The power and rate tags, and the energy card.">
+  <Part src="/blog/home-assistant-pi/parts/tag-power.jpg" alt="Tag: 109 W with a small graph of the last 24 hours" width={165} />
+  <Part src="/blog/home-assistant-pi/parts/tag-rate.jpg" alt="Tag: Reduced till 15:00" width={164} />
+  <Part src="/blog/home-assistant-pi/parts/card-energy.jpg" alt="Energy card: 603 Wh today with a power graph, 0.11 euros today, about 6.25 euros a month" width={290} />
+</Parts>
+
+Tapping either opens the energy page: what the house is using now, how much it has cost today at the right rate for each hour, how much each device used, what the fridge's compressor has been doing, today's cheap and normal hours, and the month so far.
+
+<Figure src="/blog/home-assistant-pi/energy.jpg" alt="The Energy page: power now, kWh and cost today, the fridge's power over the last 24 hours, energy by device, the fridge card marked Protected, today's price zones and the month so far." caption="The energy page." wide />
+
+### The vacuum
+
+The vacuum card says what Tim is doing, his battery, and when he last cleaned.
+
+<Parts caption="The vacuum card.">
+  <Part src="/blog/home-assistant-pi/parts/card-tim.jpg" alt="Vacuum card: Tim docked, 100% battery, cleaned 7 days ago" width={290} />
+</Parts>
+
+His page has his live map, which rooms to clean, the suction level, how worn his brushes and filter are, and his recent cleans.
+
+<Figure src="/blog/home-assistant-pi/tim.jpg" alt="The Tim page: the vacuum's live map with rooms, last clean stats, suction level and Clean all button, plus brush and filter wear and the last five cleans." caption="Tim's page." wide />
+
+### Weather
+
+The weather has both a tag and a card: the temperature, the conditions, and the next sunrise or sunset.
+
+<Parts caption="The weather tag and card.">
+  <Part src="/blog/home-assistant-pi/parts/tag-weather.jpg" alt="Tag: 25 degrees and rainy" width={115} />
+  <Part src="/blog/home-assistant-pi/parts/card-weather.jpg" alt="Weather card: 25 degrees, rainy, sunset at 18:53" width={290} />
+</Parts>
+
+They open the forecast for the next hours and the next few days.
+
+<Figure src="/blog/home-assistant-pi/weather.jpg" alt="The Weather page: 24.7 degrees and rainy, a temperature line and hourly forecast, sunrise and sunset, and the next six days with high and low temperatures." caption="The weather page." wide />
+
+### The house
+
+The house card is a custom thing, a small floor plan drawn from the vacuum's map of the flat. It shows which rooms have a light on right now and how much power the house is using. Tapping it opens the 3D house, which gets its own section below.
+
+<Parts caption="The house card.">
+  <Part src="/blog/home-assistant-pi/parts/card-house.jpg" alt="House card: a small floor plan with the living room lit in gold, 1 room lit, 105 W" width={580} />
+</Parts>
+
+### The Raspberry Pi
+
+A slim card keeps an eye on the Raspberry Pi's health: its temperature, CPU, memory and SD card.
+
+<Parts caption="The Raspberry Pi card.">
+  <Part src="/blog/home-assistant-pi/parts/card-pi.jpg" alt="Raspberry Pi card: Healthy, 48 degrees, CPU 8%, RAM 39%, SD 10%" width={580} />
+</Parts>
+
+Its page has the details and the last 24 hours.
+
+<Figure src="/blog/home-assistant-pi/system.jpg" alt="The Raspberry Pi page: 49 degrees and Healthy, CPU, memory and SD card bars, 24-hour trends for temperature, CPU and memory, and details like uptime, fan speed and free space." caption="The Raspberry Pi page." wide />
+
+### Automations
+
+The last card lists the automations: what runs next and when, and whether the ones that wait for something are armed. Each detail page also lists the automations that belong to it, with a switch to turn each one on or off.
+
+<Parts caption="The Up next card.">
+  <Part src="/blog/home-assistant-pi/parts/card-upnext.jpg" alt="Up next card: Everything off tomorrow at 03:00, lights on at sunset today at 18:53, Movie time armed, and fridge watch OK" width={580} />
+</Parts>
+
+## Fun bits and bobs
+
+Once everything was connected, a few fun automations came almost for free.
+
+### A fridge that tells on itself
+
+Because the fridge sits on a smart plug, I noticed I can see its compressor: when it's running and when it's not. So there's a monitor armed that makes sure the fridge is actually working. If something makes it stop for a long time, three hours without the compressor running, I get a warning that the food inside might be going off. The plug also switches itself back on if anyone turns it off, and I get told if it drops off the network.
+
+### The lamp that matches the app
+
+The TV exposes a couple of useful things: you can turn it on and off, and it tells you which app is open right now. Next to the TV there's the laundry room, which has a translucent glass door, and a colour bulb inside. So the moment you open Netflix, the bulb breathes in with a smooth animation and glows Netflix red through the glass. The same happens for Spotify, YouTube, Disney+, Prime Video and the rest, each in its own brand colour. Switching apps crossfades between them, and the lamp stays dim so it never glares.
+
+### Movie time
+
+The moment you turn on the TV after dark, all the lights fade out and only the small string lights behind the TV stay on, to make it feel more like a movie.
+
+### The usual ones
+
+And then the typical ones, like the living room lights coming on at sunset when somebody's home.
+
+
+## The 3D house
+
+One of the things I was really excited about is that I could use the vacuum's floor plan to create a 3D representation of my house, and place all the devices inside it. I always find it hard to give devices names I'll remember, so it's really nice to just see where the thing is that you want to turn on, turn off or change, and click it.
+
+I fiddled around a lot with Claude and ended up with this 3D scene. It looks really cool and futuristic, and it's its own menu in Home Assistant.
+
+<Clip src="/blog/home-assistant-pi/house-lights.mp4" label="Animation: lights in the 3D house are tapped on one by one, each glow spreading through its room; then the light stand is held and dimmed down to 8% and back up, and the donut light is switched off and on again." caption="Tap a device to switch it, press and hold to dim it. The light spills into the room in the bulb's own colour." wide />
+
+Since every device reports its power use, I also added power lines. Each room has a green line running out of it, around the outside of the house, and it pulses faster the more that room consumes. They all merge into a single point, which shows the total consumption of the house.
+
+<Clip src="/blog/home-assistant-pi/house-flow.mp4" label="Animation: power flow is switched on and green dashed lines appear around the house, joining at a meter with the total watts; as lights are switched on, the lines for those rooms speed up and the total rises." caption="Power flow: the more a room uses, the faster its line pulses." wide />
+
+And of course, you can spin the whole thing around.
+
+<Clip src="/blog/home-assistant-pi/house-360.mp4" label="Animation: the lit 3D house turns a full 360 degrees with the power lines on." caption="Drag to turn the house around." wide />
+
+## How it's built
+
+If you want to build something similar, here's how it fits together.
+
+### Home Assistant as the backend
+
+Home Assistant is the backend. It already talks to every device, so the dashboard never does. It reads updates from Home Assistant, and it asks Home Assistant to do things. Home Assistant hands every custom card a `hass` object with the live state of the house, and a way to call services:
+
+```ts title="Reading state and triggering actions"
+const lamp = hass.states["light.books_table_lamp"]
+lamp.state                       // "on"
+lamp.attributes.brightness       // 0–255
+
+hass.callService("light", "toggle", {}, { entity_id: "light.books_table_lamp" })
+hass.callService("script", "turn_on", {}, { entity_id: "script.movie_time" })
+```
+
+History, for the charts, comes from Home Assistant's own database over the same connection. I wrapped those calls in TanStack Query, so they're cached and refreshed every five minutes instead of on every render:
+
+```ts title="src/hooks/data.ts"
+export function useEnergyToday(ids: string[]) {
+  const { hass } = useDashboard()
+  return useQuery({
+    queryKey: ["energy-today", new Date().toDateString(), ids],
+    refetchInterval: 5 * 60_000,
+    queryFn: () => Promise.all(ids.map((id) =>
+      hass.callWS<{ change?: number }>({
+        type: "recorder/statistic_during_period",
+        statistic_id: id,
+        calendar: { period: "day" },
+        types: ["change"],
+      }),
+    )),
+  })
+}
+```
+
+### A few helpers in Home Assistant
+
+Some things the dashboard needed didn't exist yet, so I added a few small helpers to Home Assistant's config to add a bit more functionality.
+
+A **sensor for the electricity price**, using the day and night rates from my bill:
+
+```yaml title="configuration.yaml"
+template:
+  - sensor:
+      - name: Electricity price
+        unit_of_measurement: "€/kWh"
+        state: >
+          {% set h = now().hour %}
+          {% set summer = 4 <= now().month <= 10 %}
+          {% set reduced = (2 <= h < 4 or 11 <= h < 15) if summer
+                           else (2 <= h < 5 or 12 <= h < 15) %}
+          {{ 0.1419 if reduced else 0.1949 }}
+```
+
+A **poll for when the TV is on**. The Samsung integration notices the TV turning on 30 to 60 seconds late, but the TV answers on its own local web API right away, so a REST sensor asks it every two seconds:
+
+```yaml title="configuration.yaml"
+rest:
+  - resource: http://192.168.1.141:8001/api/v2/
+    scan_interval: 2
+    timeout: 2
+    binary_sensor:
+      - name: Living room TV power
+        device_class: power
+        value_template: "{{ value_json.device.PowerState == 'on' }}"
+```
+
+And a couple of **scripts for the scenes**, plus a timer helper for the sleep timer. This is the one behind Good night and the sleep timer: everything off at once, except a small night light for the cat.
+
+```yaml title="scripts.yaml"
+everything_off:
+  alias: Everything off (night light stays on)
+  sequence:
+    - variables:
+        keep: light.night_light
+        to_off: >-
+          {{ states.light | rejectattr("attributes.entity_id", "defined")
+             | map(attribute="entity_id") | reject("eq", keep)
+             | select("is_state", "on") | list }}
+    - action: light.turn_off
+      target:
+        entity_id: "{{ to_off }}"
+      data:
+        transition: 3
+    - action: light.turn_on
+      target:
+        entity_id: "{{ keep }}"
+```
+
+> [!TIP]
+> The `rejectattr("attributes.entity_id", "defined")` skips light groups. Turning off a Hue room group can switch other bulbs in it back on.
+
+### A small React app dressed as a card
+
+The dashboard itself is a small React app dressed as a Home Assistant card. Home Assistant loads custom cards as web components and sets `hass` on them every time something changes. So the card is a thin wrapper that renders React into it, and React only updates what actually changed:
+
+```tsx title="src/main.tsx"
+class TgHomeDashboard extends HTMLElement {
+  private root?: Root
+  private config: DashboardConfig = DEFAULT_CONFIG
+
+  setConfig(config: Partial<DashboardConfig>) {
+    this.config = { ...DEFAULT_CONFIG, ...config }
+  }
+
+  set hass(hass: Hass) {
+    this.root ??= createRoot(this.attachShadow({ mode: "open" }))
+    this.root.render(
+      <DashboardProvider hass={hass} config={this.config} host={this}>
+        <Dashboard />
+      </DashboardProvider>,
+    )
+  }
+}
+
+customElements.define("tg-home-dashboard", TgHomeDashboard)
+```
+
+You can tell the card which section to show, so I include it everywhere I want. Each detail page is a Home Assistant subview, which gives it a back arrow and its own address for free:
+
+```yaml title="Dashboard config"
+views:
+  - title: Home
+    path: home
+    type: panel
+    cards:
+      - type: custom:tg-home-dashboard
+        page: hub
+  - title: Energy
+    path: energy
+    type: panel
+    subview: true
+    back_path: /home-tg/home
+    cards:
+      - type: custom:tg-home-dashboard
+        page: energy
+```
+
+Vite builds the whole app into one JavaScript file, which Home Assistant loads as a dashboard resource.
+
+### The 3D house with CSS 3D transforms
+
+The 3D house is built with CSS 3D transforms, with no 3D library. The floor plan is a flat SVG traced from the vacuum's map. CSS tilts it back and rotates it, and dragging just changes those two angles:
+
+```css title="house.css"
+.stage { perspective: 1900px; }
+
+.plan {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt)) rotateZ(var(--rz)) scale3d(var(--zoom), var(--zoom), var(--zoom));
+}
+```
+
+The walls are a few copies of the outline, each lifted a little higher, which reads as solid walls once the plan is tilted. The device markers undo the plan's rotation, so they always face you:
+
+```css title="house.css"
+.wl { transform: translateZ(calc(var(--i) * 2.4px)); }   /* stacked wall layers */
+
+.mk { transform: rotateZ(calc(-1 * var(--rz))) rotateX(calc(-1 * var(--tilt))); }
+```
+
+The power lines are dashed SVG paths with a moving dash. The more a room uses, the shorter the animation, so the faster it pulses:
+
+```tsx title="Plan.tsx"
+const flowSecs = (watts: number) => Math.max(0.22, 4 / (1 + watts / 12))
+
+<path className="flow" d={d} style={{ animationDuration: `${flowSecs(watts)}s` }} />
+```
+
+```css title="house.css"
+.flow { stroke-dasharray: 10 26; animation: flow-run linear infinite; }
+@keyframes flow-run { to { stroke-dashoffset: -36; } }
+```
+
+### Everything in Git
+
+Everything lives in Git, so I can work on it from my laptop and deploy it to the Raspberry Pi. The repo has the dashboard's source, and a script that copies the Pi's config (automations, scripts, dashboards) back into it, refusing to copy anything with a password. Deploying is one command, which builds the file and copies it over:
+
+```bash title="deploy.sh"
+npm run build
+scp dist/tg-home-dashboard.js pi5.local:/tmp/
+ssh pi5.local "sudo install -m 644 /tmp/tg-home-dashboard.js \
+  /opt/stacks/homeassistant/config/www/tg-home/"
+```
+
+
+## What's next
+
+That's it. I hope you enjoyed the walkthrough. There's a lot more I want to add:
+
+- **More reliable power numbers.** A few more smart plugs, so less of the house is estimated and more is actually measured.
+- **Plants and air.** Automating watering my plants, and monitoring the air quality at home.
+- **Cameras, vision and AI.** A couple of cameras to play with computer vision, so the house can tell, for example, where my cat is.
+
+Keep an eye out for updates.

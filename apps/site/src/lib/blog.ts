@@ -37,6 +37,10 @@ export type PostMeta = {
   /** Show the "On this page" box. Off for posts that carry their own navigation. */
   showToc: boolean
   readingMinutes: number
+  /** Thumbnail for lists: `image` (and `imageAlt`) from the frontmatter, else the first image in the post. */
+  image?: { src: string; alt: string }
+  /** The frontmatter `image` only: also replaces the generated link-preview card. */
+  cover?: { src: string; alt: string }
 }
 
 export type Post = PostMeta & { Content: MDXContent; toc: Heading[] }
@@ -82,7 +86,7 @@ export const getPosts = cache(async (): Promise<PostMeta[]> => {
   const posts = await Promise.all((await getPostSlugs()).filter((slug) => !isReference(slug)).map(getPost))
   return posts
     .filter((p) => listDrafts || !p.draft)
-    .map((p): PostMeta => ({ slug: p.slug, title: p.title, summary: p.summary, description: p.description, date: p.date, updated: p.updated, tags: p.tags, draft: p.draft, showToc: p.showToc, readingMinutes: p.readingMinutes }))
+    .map((p): PostMeta => ({ slug: p.slug, title: p.title, summary: p.summary, description: p.description, date: p.date, updated: p.updated, tags: p.tags, draft: p.draft, showToc: p.showToc, readingMinutes: p.readingMinutes, image: p.image, cover: p.cover }))
     .sort((a, b) => b.date.getTime() - a.date.getTime())
 })
 
@@ -104,7 +108,19 @@ function parseMeta(slug: string, fm: unknown, source: string): PostMeta {
     draft: m.draft === true,
     showToc: m.toc !== false,
     readingMinutes: Math.max(1, Math.round(words / 230)),
+    cover: m.image ? { src: String(m.image), alt: m.imageAlt ? String(m.imageAlt) : '' } : undefined,
+    image: m.image ? { src: String(m.image), alt: m.imageAlt ? String(m.imageAlt) : '' } : firstImage(source),
   }
+}
+
+// The first <Figure src>, <img src> or markdown image in the post body.
+function firstImage(source: string): PostMeta['image'] {
+  const body = source.replace(/^---[\s\S]*?---/, '')
+  const tag = /<(?:Figure|img)\b[^>]*?\ssrc="([^"]+)"[^>]*>/.exec(body)
+  const md = /!\[([^\]]*)\]\(([^)\s]+)[^)]*\)/.exec(body)
+  if (tag && (!md || tag.index < md.index)) return { src: tag[1], alt: /\salt="([^"]*)"/.exec(tag[0])?.[1] ?? '' }
+  if (md) return { src: md[2], alt: md[1] }
+  return undefined
 }
 
 type HastNode = { type: string; tagName?: string; value?: string; properties?: Record<string, unknown>; children?: HastNode[] }
