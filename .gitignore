@@ -11,3 +11,4 @@ npm-debug.log*
 
 # generated from apps/site/content/skills by scripts/build-skills.mjs
 apps/site/public/skills/
+.design/

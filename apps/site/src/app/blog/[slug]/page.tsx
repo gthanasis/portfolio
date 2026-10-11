@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { breadcrumbs, formatDate, getPost, getPostSlugs, getPosts, type PostMeta } from '@/lib/blog'
@@ -42,6 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PostPage({ params }: Props) {
   const post = await getPost((await params).slug)
   const { Content, toc } = post
+  const sections = post.showToc ? toc.filter((h) => h.depth === 2) : []
   const url = `${site.url}/blog/${post.slug}`
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -90,31 +92,34 @@ export default async function PostPage({ params }: Props) {
           </div>
         </header>
 
-        {post.showToc && toc.length > 2 && (
-          <nav className="toc" aria-label="On this page">
-            <details open>
-              <summary>
-                <span>On this page</span>
-                <span>{toc.filter((h) => h.depth === 2).length} sections</span>
-              </summary>
-              <ol>
-                {toc.map((h) => (
-                  <li key={h.id} data-depth={h.depth}>
-                    <a href={`#${h.id}`}>{h.text}</a>
-                  </li>
-                ))}
-              </ol>
-            </details>
-          </nav>
-        )}
+        {sections.length > 2 && <Contents sections={sections} className="toc toc-inline" />}
 
         <div className="prose">
           <Content components={mdxComponents} />
         </div>
       </div>
 
-      <MoreArticles current={post} posts={await getPosts()} />
+      <aside className="rail">
+        {sections.length > 2 && <Contents sections={sections} className="toc toc-rail" />}
+        <MoreArticles current={post} posts={await getPosts()} />
+      </aside>
     </article>
+  )
+}
+
+/** The post's main sections, numbered. Rendered twice: in the right column on wide screens, under the title otherwise. */
+function Contents({ sections, className }: { sections: { id: string; text: string }[]; className: string }) {
+  return (
+    <nav className={className} aria-label="On this page" style={{ '--rows': Math.ceil(sections.length / 2) } as CSSProperties}>
+      <h2>On this page</h2>
+      <ol>
+        {sections.map((h) => (
+          <li key={h.id}>
+            <a href={`#${h.id}`}>{h.text}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
   )
 }
 
@@ -127,7 +132,7 @@ function MoreArticles({ current, posts }: { current: PostMeta; posts: PostMeta[]
     .slice(0, 3)
   if (!more.length) return null
   return (
-    <aside className="more" aria-labelledby="more-h">
+    <section className="more" aria-labelledby="more-h">
       <h2 id="more-h">More articles</h2>
       <ul>
         {more.map((p) => (
@@ -144,6 +149,6 @@ function MoreArticles({ current, posts }: { current: PostMeta; posts: PostMeta[]
           </li>
         ))}
       </ul>
-    </aside>
+    </section>
   )
 }
