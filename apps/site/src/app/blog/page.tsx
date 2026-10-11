@@ -5,7 +5,7 @@ import { site } from '@/lib/site'
 
 const title = `Articles | ${site.name}`
 const description =
-  'Notes from Thanasis Gkliatis on agentic coding, Claude Code skills and shipping reliable software with coding agents.'
+  'Notes from Thanasis Gkliatis on agentic coding, Claude Code skills, self-hosted infrastructure and home automation.'
 
 export const metadata: Metadata = {
   title,
