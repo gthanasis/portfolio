@@ -6,7 +6,6 @@ export const person = {
   role: 'Senior Software Engineer',
   employer: 'n8n',
   tagline: 'Distributed systems, platforms and production AI',
-  location: 'Athens, Greece',
   email: 'thanasis.glts@gmail.com',
   web: 'https://gthanasis.com',
   github: 'https://github.com/gthanasis',

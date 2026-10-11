@@ -53,7 +53,6 @@ const jsonLd = {
       image: site.photo,
       jobTitle: site.role,
       worksFor: { '@type': 'Organization', name: site.employer.name, url: site.employer.url },
-      address: { '@type': 'PostalAddress', addressLocality: 'Athens', addressCountry: 'GR' },
       email: `mailto:${site.email}`,
       sameAs: [site.github, site.linkedin, site.cv],
       knowsAbout: ['Agentic coding', 'AI-assisted software development', 'Distributed systems', 'Kafka', 'PostgreSQL', 'Elasticsearch', 'TypeScript', 'Next.js', 'LLMs'],

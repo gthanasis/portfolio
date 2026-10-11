@@ -21,7 +21,7 @@ export function Intro() {
           <Image src={site.photo} alt="" width={48} height={48} priority />
           <div>
             <b>{site.name}</b>
-            {site.role} at {site.employer.name} · Athens
+            {site.role} at {site.employer.name}
           </div>
         </div>
         <h1>

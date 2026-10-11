@@ -42,10 +42,6 @@ export default function CV() {
                 {person.linkedin.split('/in/')[1]}
               </a>
             </li>
-            <li>
-              <span className="k">based</span>
-              {person.location}
-            </li>
           </ul>
         </header>
 

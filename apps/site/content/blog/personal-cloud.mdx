@@ -1,0 +1,355 @@
+---
+title: Rolling out my personal cloud
+summary: With AI, shipping an app takes days. I wanted every new one to deploy in minutes, with monitoring, logs and alerts already in place.
+description: How I left DigitalOcean for my own small Kubernetes cluster on Hetzner, behind Cloudflare with no public ports, where every app gets logs, metrics and alerts out of the box, for about €47 a month.
+date: 2026-10-08
+updated: 2026-10-11
+tags: [infrastructure, kubernetes, cloudflare, terraform]
+image: /blog/personal-cloud/cover.jpg
+imageAlt: "Diagram: your app deploys through Cloudflare into a k3s cluster on Hetzner, where every app gets logs, metrics, alerts and security scans. About 47 euros a month, zero public ports, one Terraform block per app."
+draft: false
+---
+
+I used to run my apps on DigitalOcean. Running even one app properly, spread over more than one machine so it stays up when one of them fails, cost me around €100 a month.
+
+So I decided to build my own small platform instead. One place where every app I ship gets monitoring, logs and alerts out of the box, and where deploying a new one takes minutes. It now runs all of them for about €47 a month.
+
+## Why build my own
+
+I've always liked the idea of managed cloud services. Most of the security is already in place, and you don't really have to care about upgrades and the rest. But it costs a lot.
+
+What I mostly do right now is build small apps and proofs of concept, to test the market quickly and see whether an idea fits or not. For that, I don't need to pay that much.
+
+I also wanted a better understanding of the whole lifecycle. Now that changes are cheap, monitoring is cheap and you can use Claude for almost everything, it felt like a good time to start hand-rolling things and learn them the hard way.
+
+I do try to harden everything and understand the security issues, and I regularly go over it all to make sure nothing is left out. And I get the excitement and fun of having built something on my own: something cheap that works out of the box for every app.
+
+So I moved everything to Hetzner. The same kind of server costs roughly half of what it does on DigitalOcean. Instead of managed Kubernetes, whose own system pods take about a quarter of a small server's CPU before any app starts, I run k3s, a lighter version that needs about half that. The catch is that upgrades, backups and replacing a broken server are now my job.
+
+| | |
+|---|---|
+| Cloud | Hetzner, Falkenstein |
+| Cluster | k3s via kube-hetzner: one control plane (4 vCPU / 8 GB), two app nodes (8 vCPU / 16 GB) |
+| Way in | Cloudflare Tunnel, with Cloudflare Access for logins |
+| Metrics and logs | Prometheus, Loki, Alloy, Grafana |
+| Terraform state | Cloudflare R2 |
+| Cost | about €47 a month before VAT |
+
+## Setting up the cluster
+
+I didn't set up k3s by hand. [kube-hetzner](https://github.com/kube-hetzner/terraform-hcloud-kube-hetzner) is a Terraform module that builds the servers, the network, the firewall and the cluster, on an OS that patches itself. My config is mostly a list of servers:
+
+```hcl title="terraform/main.tf (trimmed)" {16,19-27}
+module "cluster" {
+  source  = "kube-hetzner/kube-hetzner/hcloud"
+  version = "x.y.z"   # pin it
+
+  control_plane_nodepools = [
+    { name = "control", server_type = "cx33", location = "fsn1", count = 1, labels = [], taints = [] }
+  ]
+  agent_nodepools = [
+    { name = "agent", server_type = "cx43", location = "fsn1", count = 2, labels = [], taints = [] }
+  ]
+
+  ingress_controller = "traefik"
+  enable_cert_manager = false   # TLS ends at Cloudflare
+
+  # Never let a Hetzner load balancer appear (see below).
+  enable_klipper_metal_lb = true
+
+  # The only traffic the firewall needs to allow is cloudflared dialling out.
+  extra_firewall_rules = [
+    {
+      description     = "cloudflared -> Cloudflare edge (QUIC)"
+      direction       = "out"
+      protocol        = "udp"
+      port            = "7844"
+      destination_ips = ["0.0.0.0/0", "::/0"]
+    },
+  ]
+}
+```
+
+Going to three control-plane nodes later means changing `count = 1` to `3` and running `terraform apply`.
+
+> [!WARNING]
+> kube-hetzner turns its built-in load balancer on for single-node clusters, then swaps it for a real Hetzner load balancer (about €6 a month) the moment you add a node. A routine `count` bump would quietly start a new bill. With a tunnel in front, a load balancer has nothing to do, so `enable_klipper_metal_lb = true` is forced on.
+
+## Cloudflare in front of everything
+
+Instead of opening my servers to the internet, I put Cloudflare in front of them, in what's usually called a Zero Trust setup. All my domains already live in Cloudflare, so it's easy to have Claude set everything up and have every app inherit the same security policies.
+
+Having Cloudflare as the starting point gives me a lot out of the box:
+
+- **DDoS protection**, a **firewall** and **bot blocking**, before traffic ever reaches my servers
+- a **CDN** and **caching**, so pages load from somewhere close to the visitor
+- **HTTPS**, with no certificates to manage
+- a nifty way to **lock down a single app**: Cloudflare asks for your email and sends you a code before letting you in
+
+The servers don't open any ports to the public. A small program called `cloudflared` runs inside the cluster and opens a connection out to Cloudflare, and visitors' requests come back down that connection. The only ports open are SSH and the cluster API, and only to my own IP address, so for everyone else there's no way around Cloudflare.
+
+<Figure caption="Top: the only way in, through a tunnel cloudflared opened from inside. Middle: logs. Bottom: metrics, and the heartbeat that lives outside the cluster it watches." wide>
+  <svg viewBox="0 0 960 340" role="img" aria-label="Diagram. Top row: a visitor goes through Cloudflare Access and Tunnel to cloudflared, Traefik and the apps inside the Hetzner k3s cluster. Middle row: Alloy collects the apps' logs into Loki, shown in Grafana. Bottom row: Prometheus scrapes metrics into Grafana and pings a heartbeat Worker that runs on Cloudflare, outside the cluster.">
+    <g fill="none" stroke="currentColor" strokeOpacity=".3" strokeDasharray="4 4">
+      <rect x="160" y="20" width="260" height="300" rx="12" />
+      <rect x="450" y="20" width="490" height="300" rx="12" />
+    </g>
+    <g fill="none" stroke="currentColor" strokeOpacity=".4">
+      <rect x="20" y="70" width="110" height="46" rx="8" />
+      <rect x="180" y="70" width="100" height="46" rx="8" />
+      <rect x="300" y="70" width="100" height="46" rx="8" />
+      <rect x="470" y="70" width="120" height="46" rx="8" />
+      <rect x="620" y="70" width="100" height="46" rx="8" />
+      <rect x="750" y="70" width="170" height="46" rx="8" />
+      <rect x="470" y="170" width="120" height="46" rx="8" />
+      <rect x="620" y="170" width="100" height="46" rx="8" />
+      <rect x="750" y="170" width="170" height="46" rx="8" />
+      <rect x="610" y="255" width="120" height="46" rx="8" />
+      <rect x="180" y="255" width="220" height="46" rx="8" />
+      <path d="M130 93h50M280 93h20M400 93h70M590 93h30M720 93h30" />
+      <path d="M590 193h30M720 193h30M730 278h105v-62" />
+      <path d="M835 116v22H530v32" strokeDasharray="3 4" />
+      <path d="M610 278H400" strokeDasharray="3 4" />
+    </g>
+    <g fill="currentColor" fontFamily="var(--font-mono)" fontSize="15" textAnchor="middle">
+      <text x="75" y="98">visitor</text>
+      <text x="290" y="48" fillOpacity=".55">Cloudflare</text>
+      <text x="230" y="98">Access</text>
+      <text x="350" y="98">Tunnel</text>
+      <text x="695" y="48" fillOpacity=".55">Hetzner · k3s</text>
+      <text x="530" y="98">cloudflared</text>
+      <text x="670" y="98">Traefik</text>
+      <text x="835" y="98">apps</text>
+      <text x="530" y="198">Alloy</text>
+      <text x="670" y="198">Loki</text>
+      <text x="835" y="198">Grafana</text>
+      <text x="670" y="283">Prometheus</text>
+      <text x="290" y="283">heartbeat Worker</text>
+    </g>
+    <g fill="currentColor" fillOpacity=".55" fontFamily="var(--font-mono)" fontSize="12" textAnchor="middle">
+      <text x="682" y="151">logs</text>
+      <text x="530" y="270">ping every minute</text>
+    </g>
+  </svg>
+</Figure>
+
+`cloudflared` runs as two copies on different servers, so one restarting never takes the apps offline:
+
+```yaml title="platform/cloudflare/cloudflared.yaml (trimmed)" {7,20}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: cloudflare
+spec:
+  replicas: 2   # one restarting never drops every route
+  template:
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector: { matchLabels: { app.kubernetes.io/name: cloudflared } }
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:<pinned version>
+          args: [tunnel, --no-autoupdate, run]   # the tunnel token comes from a Secret
+```
+
+The routes aren't in this file. The tunnel keeps its config in Cloudflare, so adding a hostname is one API call and cloudflared keeps running untouched. Anything without a specific route falls through to Traefik, which reads ordinary Kubernetes `Ingress` objects. So an app just ships a normal Ingress.
+
+So there are two Cloudflare products doing two jobs. **Tunnel** is how a request gets in. **Access** is who's allowed in.
+
+> [!CAUTION]
+> These are separate steps. A hostname routed through the tunnel is public until an Access policy exists for it. Skip the second step and the app is open to anyone who guesses the name.
+
+## What every app gets out of the box
+
+My infra repo has a guide for apps: what an app needs to do to run on the cluster. Each app lives in its own repo, with its own manifests, its own image and its own CI. If it follows a few conventions, it plugs straight into the platform and gets everything below, without being registered anywhere.
+
+### Deploying
+
+Each app builds its image, pushes it to a registry (I use GitHub's), and its CI applies its manifests to the cluster. The cluster's API isn't on the internet either, so CI reaches it through Cloudflare too. More on that in [adding a new app](#adding-a-new-app).
+
+### Logs
+
+Every app's logs end up in Grafana. Apps just write to the console, and a collector on each server picks up the output of every container. To know which app a line came from, the app only needs one label:
+
+```yaml title="deployment.yaml"
+template:
+  metadata:
+    labels:
+      app.kubernetes.io/name: portfolio   # logs now say app="portfolio"
+```
+
+From there I can filter by app, by level, or by apps versus the platform itself.
+
+The level is read from each line when it's collected, so an app should log in one of a few formats. JSON is best:
+
+| Format | Example |
+|---|---|
+| JSON | `{"level":"warn","msg":"retrying"}` |
+| logfmt | `level=error msg="payment failed"` |
+| bracketed | `[ERROR] connection reset` |
+
+Anything else is still collected, just labelled `unknown`.
+
+### Metrics and dashboards
+
+Same idea for metrics. If an app exposes them, it adds a small `ServiceMonitor` file next to its other manifests and Prometheus starts collecting them:
+
+```yaml title="servicemonitor.yaml"
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: portfolio
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: portfolio }
+  endpoints:
+    - port: http
+      path: /metrics
+```
+
+Grafana has a set of shared dashboards for logs, CPU and memory, traffic and security issues. Each one can be filtered to a single app, or to apps versus the platform. An app that wants its own dashboard ships it as a ConfigMap labelled `grafana_dashboard: "1"`, and Grafana loads it.
+
+### Alerts
+
+On top of all this sit the alerts. They cover every app without any setup: a container that keeps restarting or runs out of memory, a pod that hasn't been ready for 15 minutes, a disk filling up, a backup that hasn't succeeded in a day, and a new critical security issue with a fix available.
+
+They go to a small n8n workflow that decides whether it's worth messaging me on Telegram.
+
+### Private apps
+
+This one comes for free from Cloudflare. Any app can be locked behind the emailed code from earlier, so I can share something unfinished without creating accounts for anyone.
+
+## Adding a new app
+
+Adding an app now starts with a decision: a subdomain of something I already own, or a new domain. Either way, setting it up is mostly asking Claude to do it, since everything it needs is already in place.
+
+Then the app has to run in a container and ship its Kubernetes files, with the right labels. This is what a new app includes to plug in:
+
+```text
+my-app/
+├── Dockerfile
+├── deploy/k8s/
+│   ├── kustomization.yaml   # the files to apply, and the image tag
+│   ├── deployment.yaml      # the app label, resources, health checks
+│   ├── service.yaml
+│   └── ingress.yaml         # the hostname
+└── .github/workflows/deploy.yml
+```
+
+The ingress is the part that publishes it. There's no certificate in it, because HTTPS ends at Cloudflare:
+
+```yaml title="deploy/k8s/ingress.yaml (trimmed)"
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portfolio
+  labels:
+    app.kubernetes.io/name: portfolio
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: gthanasis.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: portfolio, port: { name: http } }
+```
+
+On the infra side, each app needs one more Terraform block. The app decides its own code and how it's built. The infra decides the things that were never the app's call: where it lives, what its CI may touch, its hostname and who can open it.
+
+```hcl title="terraform/apps.tf"
+module "portfolio" {
+  source = "./modules/app-onboarding"
+
+  name = "portfolio"
+  repo = "gthanasis/portfolio"
+  tier = "app"
+
+  # Public on purpose: it's a portfolio. Leave access_emails empty only when that's true.
+  hostname = "gthanasis.com"
+  zone_id  = local.zones["gthanasis.com"]
+
+  cloudflare_account_id = local.cloudflare_account_id
+  tunnel_id             = local.tunnel_id
+}
+```
+
+Running it creates:
+
+- a **namespace** of its own, labelled as an app so the network rules and security scans treat it as one
+- a **CI identity** that can deploy into that namespace and nothing else. It can't read secrets, and it can't see other apps.
+- a **Cloudflare token** that lets that app's CI, and only that app's CI, reach the cluster
+- a **DNS record** pointing the hostname at the tunnel
+- the **email lock**, when the app isn't public
+
+### The deploy pipeline
+
+Every push to `main` runs the app's pipeline:
+
+1. **Checks:** lint and type checks.
+2. **Build:** builds the image and pushes it, tagged with the commit, so every version can be rolled back to.
+3. **Connect:** the cluster's API isn't on the internet, so the pipeline opens a tunnel to it through Cloudflare, using the app's token.
+4. **Deploy:** applies the Kubernetes files.
+5. **Wait:** waits until the new version is actually running. If it never comes up, the build goes red, instead of reporting success while the app crashes.
+
+```yaml title=".github/workflows/deploy.yml (trimmed)"
+- name: Open a tunnel to the cluster API
+  env:
+    TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+    TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+  run: |
+    ./cloudflared access tcp --hostname "$CLUSTER_HOSTNAME" --url 127.0.0.1:6443 \
+      --service-token-id "$TUNNEL_SERVICE_TOKEN_ID" \
+      --service-token-secret "$TUNNEL_SERVICE_TOKEN_SECRET" &
+    for i in $(seq 1 30); do nc -z 127.0.0.1 6443 && exit 0; sleep 1; done
+    exit 1
+
+- name: Deploy
+  run: |
+    kubectl config set-cluster pilot --server=https://127.0.0.1:6443 --certificate-authority=ca.crt
+    kubectl config set-credentials ci --token="$KUBE_TOKEN"
+    kubectl apply -k deploy/k8s
+    kubectl rollout status deploy/portfolio --timeout=180s
+```
+
+## When the monitoring itself goes down
+
+All the alerts above run inside the cluster. Prometheus watches the apps, and Alertmanager sends the messages. That has a hole: if the cluster goes down, the thing that would tell me goes down with it. And silence looks exactly like everything being fine.
+
+That's exactly what happened on 28 August. The cluster was down for 6 hours 41 minutes, and nothing told me.
+
+So the last check lives outside the cluster, on Cloudflare. Alertmanager has one alert that's always firing on purpose, and every five minutes it sends it to a small Cloudflare Worker. The Worker remembers when the last one arrived. If nothing has come in for 15 minutes, it messages me on Telegram, and it messages again once the pings are back.
+
+```js title="platform/heartbeat/worker.js (trimmed)"
+async function heartbeat(env) {
+  const now = nowSeconds()
+  const staleAfter = Number(env.STALE_AFTER_SECONDS ?? 900)
+  const last = Number((await env.HEARTBEAT.get('last-ping')) ?? 0)
+  if (!last) return // never pinged: a fresh deploy hasn't lost anything yet
+
+  const outageSince = Number((await env.HEARTBEAT.get('outage-since')) ?? 0)
+  const age = now - last
+
+  if (age > staleAfter && !outageSince) {
+    const sent = await notify(env, `Cluster heartbeat lost. No ping for ${duration(age)}.`)
+    // Only remember the outage once the message actually went out.
+    if (sent) await env.HEARTBEAT.put('outage-since', String(last))
+  }
+}
+```
+
+All it knows is that the whole chain stopped answering. That's also the one thing the alerts inside the cluster can never report about themselves.
+
+The same Worker runs a second check every hour: is what's merged in the infra repo actually running? Between 29 August and 21 September, the pipeline that applies platform changes couldn't reach the cluster, and nothing complained. The cluster kept running its last good config, so every alert stayed quiet. Three weeks of changes simply never arrived. Now the Worker asks GitHub, from outside both, and pings me when they disagree.
+
+## Want one too?
+
+If you'd like something similar, [get in touch](/#contact). I can set up a personal cloud for you, ready to deploy your apps with Claude.
