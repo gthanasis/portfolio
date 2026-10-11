@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { site } from '@/lib/site'
 
 type Step = { title: string; note: string; by: string; role: 'me' | 'setup' | 'build' | 'test' | 'qa' }
@@ -18,24 +19,31 @@ export function Intro() {
     <div className="intro">
       <div>
         <div className="who">
-          <Image src={site.photo} alt="" width={48} height={48} priority />
-          <div>
-            <b>{site.name}</b>
+          <Image src={site.photo} alt={site.name} width={72} height={72} priority />
+          <span>
             {site.role} at {site.employer.name}
-          </div>
+          </span>
         </div>
         <h1>
-          Reliable systems, built through <em>agentic coding</em>.
+          Hi, I&apos;m Thanasis. I build software with <em>swarms of coding agents</em>.
         </h1>
         <p>
-          I run swarms of coding agents that write software <strong>my way</strong>: simple, reliable and tested.
-          That&apos;s how I deliver production-grade software with AI, for my own products and for clients.
+          By day I&apos;m an engineer at {site.employer.name}. The rest of the time I ship my own products, run my own
+          little cloud, and keep making my home a bit smarter.
+        </p>
+        <p>
+          The agents write it <strong>my way</strong>: simple, reliable and tested. That&apos;s how I deliver
+          production-grade software with AI, for my own products and for clients.
         </p>
         <div className="cta">
           <a className="btn btn-primary" href="#contact">
             Work with me
           </a>
           <a href={site.cv}>Read my CV</a>
+          <span className="socials">
+            <a href={site.github}>GitHub</a>
+            <a href={site.linkedin}>LinkedIn</a>
+          </span>
         </div>
       </div>
 
@@ -55,7 +63,9 @@ export function Intro() {
             </li>
           ))}
         </ol>
-        <figcaption className="loop-foot">Custom agent skill set coming soon</figcaption>
+        <figcaption className="loop-foot">
+          <Link href="/blog/claude-code-skills">The skills behind this loop →</Link>
+        </figcaption>
       </figure>
     </div>
   )

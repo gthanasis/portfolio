@@ -35,9 +35,8 @@ a:hover { color: hsl(var(--primary)); }
 /* intro */
 .intro { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; padding: 64px 0 96px; align-items: start; }
 @media (max-width: 900px) { .intro { grid-template-columns: 1fr; gap: 44px; padding: 28px 0 64px; } }
-.who { display: flex; align-items: center; gap: 14px; margin-bottom: 30px; font-size: .92rem; color: hsl(var(--muted-foreground)); }
-.who img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: hsl(var(--muted)); }
-.who b { display: block; color: hsl(var(--foreground)); font-weight: 600; }
+.who { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; font: .85rem var(--font-mono), monospace; color: hsl(var(--muted-foreground)); }
+.who img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: hsl(var(--muted)); }
 h1 { font-size: clamp(2.4rem, 5vw, 3.9rem); line-height: 1.04; letter-spacing: -.035em; font-weight: 600; margin: 0 0 26px; }
 h1 em { font-style: normal; color: hsl(var(--primary)); }
 .intro p { margin: 0 0 16px; max-width: 50ch; color: hsl(var(--muted-foreground)); font-size: 1.1rem; }
@@ -46,6 +45,9 @@ h1 em { font-style: normal; color: hsl(var(--primary)); }
 .tenets li { font: .85rem var(--font-mono), monospace; padding: 6px 12px; border: 1px solid hsl(var(--border)); border-radius: 999px; }
 .tenets li b { color: hsl(var(--primary)); font-weight: 500; }
 .intro .cta { margin-top: 32px; }
+.socials { display: flex; gap: 16px; font: .85rem var(--font-mono), monospace; }
+.socials a { color: hsl(var(--muted-foreground)); text-decoration: none; }
+.socials a:hover { color: hsl(var(--primary)); }
 .cta { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
 
 /* the loop: how one change ships */
@@ -69,6 +71,8 @@ h1 em { font-style: normal; color: hsl(var(--primary)); }
 .loop li::before { border-color: hsl(var(--c) / .7) !important; color: hsl(var(--c)) !important; }
 .loop li .who-does { color: hsl(var(--c)); background: hsl(var(--c) / .12); padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
 .loop-foot { padding: 12px 18px; border-top: 1px solid hsl(var(--border)); font: .78rem var(--font-mono), monospace; color: hsl(var(--muted-foreground)); }
+.loop-foot a { color: hsl(var(--primary)); text-decoration: none; }
+.loop-foot a:hover { text-decoration: underline; }
 
 /* github */
 .gh-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 28px; }
