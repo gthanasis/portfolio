@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { products } from '@/lib/products'
 
 export function Building() {
   return (
@@ -44,6 +45,20 @@ export function Building() {
           <span>mongodb</span>
         </div>
       </article>
+      <h3 className="products-head">Also building</h3>
+      <ul className="products">
+        {products
+          .filter((p) => !p.featured)
+          .map((p) => (
+            <li key={p.name}>
+              <h4>
+                {p.url ? <a href={p.url}>{p.name}</a> : p.name}{' '}
+                <span className={p.status === 'live' ? 'status live' : 'status'}>{p.status}</span>
+              </h4>
+              <p>{p.blurb}</p>
+            </li>
+          ))}
+      </ul>
     </section>
   )
 }

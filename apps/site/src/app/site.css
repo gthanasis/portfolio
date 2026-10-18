@@ -185,6 +185,23 @@ h1 em { font-style: normal; color: hsl(var(--primary)); }
   .feature-logo { width: 44px; height: 44px; align-self: start; }
 }
 
+/* the other products, listed under the featured one */
+.products-head { margin: 56px 0 16px; font-size: 1rem; font-weight: 600; color: hsl(var(--muted-foreground)); }
+.products { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.products li { padding: 18px 20px; border: 1px solid hsl(var(--border)); border-radius: 12px; background: hsl(var(--card)); }
+.products h4 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.products h4 a { color: inherit; }
+.products p { margin: 0; color: hsl(var(--muted-foreground)); font-size: .95rem; }
+
+/* legal: the company behind the products */
+.legal { padding: 64px 0 24px; max-width: 68ch; }
+.legal h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 600; letter-spacing: -.03em; margin: 0 0 20px; }
+.legal h2 { font-size: 1.2rem; font-weight: 600; margin: 40px 0 10px; }
+.legal p, .legal li { color: hsl(var(--muted-foreground)); }
+.legal table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.legal th, .legal td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid hsl(var(--border)); vertical-align: top; }
+.legal th { font-weight: 600; }
+
 /* contact: a prompt-style composer, then where to reply */
 .c-title { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 600; letter-spacing: -.035em; line-height: 1.1; margin: 0 0 28px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
