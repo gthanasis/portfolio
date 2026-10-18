@@ -14,4 +14,6 @@ export const site = {
   github: 'https://github.com/gthanasis',
   githubUser: 'gthanasis',
   linkedin: 'https://www.linkedin.com/in/thanasis-gkliatis',
+  // The company that owns and sells the products, as registered.
+  company: { legalName: 'GKLIATIS ATHANASIOS KAI SIA L.P.', country: 'Greece' },
 } as const
