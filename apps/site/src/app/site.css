@@ -192,6 +192,19 @@ h1 em { font-style: normal; color: hsl(var(--primary)); }
 .products h4 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .products h4 a { color: inherit; }
 .products p { margin: 0; color: hsl(var(--muted-foreground)); font-size: .95rem; }
+.products.shots { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: 16px; }
+.products.shots li { padding: 0; overflow: hidden; display: flex; flex-direction: column; transition: border-color .25s; }
+.products.shots li:hover { border-color: hsl(var(--foreground) / .3); }
+.products.shots .body { padding: 16px 20px 18px; }
+/* The pictures share one shape, so cards side by side line up; each fills it its own way. */
+.products.shots .frame { display: block; aspect-ratio: 16 / 9; border-bottom: 1px solid hsl(var(--border)); overflow: hidden; }
+.products.shots .frame video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.products.shots .frame-bg { height: 100%; display: grid; place-items: center; padding: 0 4%; background: var(--frame-dark); }
+.products.shots .frame-bg img { width: 100%; height: auto; }
+:root[data-theme='light'] .products.shots .frame-bg { background: var(--frame-light); }
+.only-light { display: none; }
+:root[data-theme='light'] .only-light { display: block; }
+:root[data-theme='light'] .only-dark { display: none; }
 
 /* legal: the company behind the products */
 .legal { padding: 64px 0 24px; max-width: 68ch; }

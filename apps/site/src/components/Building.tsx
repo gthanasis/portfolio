@@ -1,5 +1,31 @@
 import Image from 'next/image'
-import { products } from '@/lib/products'
+import type { CSSProperties } from 'react'
+import { ClipVideo } from '@/components/blog/ClipVideo'
+import { products, type Product } from '@/lib/products'
+
+const others = products.filter((p) => !p.featured)
+
+function Title({ p }: { p: Product }) {
+  return (
+    <h4>
+      {p.url ? <a href={p.url}>{p.name}</a> : p.name}{' '}
+      <span className={p.status === 'live' ? 'status live' : 'status'}>{p.status}</span>
+    </h4>
+  )
+}
+
+/** The picture at the top of a product card: both theme versions of an image (CSS shows one), or a clip. */
+function Visual({ p }: { p: Product }) {
+  const v = p.visual!
+  if (v.kind === 'clip') return <ClipVideo src={v.src} label={v.label} />
+  const bg = { '--frame-light': v.background.light, '--frame-dark': v.background.dark } as CSSProperties
+  return (
+    <div className="frame-bg" style={bg}>
+      <Image className="only-dark" src={v.dark} alt={v.alt} width={1600} height={550} sizes="(max-width: 720px) 100vw, 508px" />
+      <Image className="only-light" src={v.light} alt={v.alt} width={1600} height={550} sizes="(max-width: 720px) 100vw, 508px" />
+    </div>
+  )
+}
 
 export function Building() {
   return (
@@ -46,15 +72,34 @@ export function Building() {
         </div>
       </article>
       <h3 className="products-head">Also building</h3>
-      <ul className="products">
-        {products
-          .filter((p) => !p.featured)
+      <ul className="products shots">
+        {others
+          .filter((p) => p.visual)
           .map((p) => (
             <li key={p.name}>
-              <h4>
-                {p.url ? <a href={p.url}>{p.name}</a> : p.name}{' '}
-                <span className={p.status === 'live' ? 'status live' : 'status'}>{p.status}</span>
-              </h4>
+              {/* An image links to the project too; a clip doesn't, since it may show its own controls. */}
+              {p.url && p.visual?.kind === 'image' ? (
+                <a className="frame" href={p.url} tabIndex={-1} aria-hidden="true">
+                  <Visual p={p} />
+                </a>
+              ) : (
+                <div className="frame">
+                  <Visual p={p} />
+                </div>
+              )}
+              <div className="body">
+                <Title p={p} />
+                <p>{p.blurb}</p>
+              </div>
+            </li>
+          ))}
+      </ul>
+      <ul className="products">
+        {others
+          .filter((p) => !p.visual)
+          .map((p) => (
+            <li key={p.name}>
+              <Title p={p} />
               <p>{p.blurb}</p>
             </li>
           ))}
