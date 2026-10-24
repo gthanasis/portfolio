@@ -1,7 +1,7 @@
 ---
 title: Break your dev loop down to skills
 summary: Stop re-explaining your workflow to every coding agent.
-description: Nine Claude Code skills that turn your dev loop into steps an agent can run on its own. File tickets, ship PRs from isolated worktrees, test in a real browser.
+description: Ten Claude Code skills that turn your dev loop into steps an agent can run on its own. File tickets, refine a stale backlog, ship PRs from isolated worktrees, test in a real browser.
 date: 2026-10-08
 tags: [agentic coding, claude code]
 image: /blog/claude-code-skills/cover.jpg
@@ -14,6 +14,7 @@ toc: false
   <SkillGroup>Tickets</SkillGroup>
   <SkillRow name="tg:new-ticket" href="#file-a-ticket-worth-picking-up">Note in, proper GitHub issue out.</SkillRow>
   <SkillRow name="tg:pick-ticket" href="#from-ticket-to-pr">Picks the next ticket and ships it as a PR.</SkillRow>
+  <SkillRow name="tg:refine-backlog" href="#the-backlog-is-lying-to-you">Walks your old tickets and tells you which ones are fiction.</SkillRow>
   <SkillGroup>Testing</SkillGroup>
   <SkillRow name="tg:uat" href="#actually-open-the-browser">Opens the browser and checks the thing works.</SkillRow>
   <SkillGroup>Code</SkillGroup>
@@ -45,6 +46,20 @@ Ask "what's next?" and get a pull request back.
 **What it does.** No issue number? It reads the backlog and suggests three or four tickets that don't touch the same code. Give it a number and it gets its own git worktree, with its own branch, URL and database. It writes a failing test first, fixes the bug and checks it in the browser. Then a script runs the checks, rebases, opens the PR and waits on CI.
 
 **Why.** I run several agents at once. If they share a database, they wreck each other's tests. And it stops at green CI, because merging is my job.
+
+<Skill name="tg:refine-backlog" needs={["git", "gh (logged in)", "the code the tickets describe"]}>
+## The backlog is lying to you
+
+Old tickets describe a product you don't have anymore.
+</Skill>
+
+**What it does.** It walks your open issues oldest first and checks each one against the code before it says a word about it. Then you get three lines: what the ticket means, how old it is, and where it's wrong. You say keep or remove. It closes, rewrites, relabels or splits, and writes the reason on the issue.
+
+The checking is the whole point. On my own backlog it found five tickets that were already built and had just never been closed, one whose complaint had been fixed as a side effect of something else, one asking for a design that another ticket had already shipped, and an epic whose entire plan had finished without anyone noticing. A hundred and eleven open issues came down to seventy-five.
+
+**Why.** A backlog rots by age, not evenly. The tickets from two months ago were written about a product that has since moved, and nobody rereads them, so they sit there looking like work. The age is the thing that makes "close it" easy to say out loud, so it tells you the age every single time.
+
+It never closes anything you didn't decide on. That part isn't a limitation, it's the job.
 
 <Skill name="tg:uat" needs={["your app running locally", "a browser tool", "curl and python3 for the helper script"]}>
 ## Actually open the browser
