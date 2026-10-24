@@ -32,9 +32,15 @@ theirs. Never close a ticket they haven't ruled on.
 Read `.claude/tg.json` for `tickets.repo` and the label axes. If it's missing,
 derive the repo from `git remote` and the taxonomy from `gh label list`.
 
-Read `references/conventions.md` in the `new-ticket` skill — the same taxonomy
-governs rewrites. In particular: **exactly one `project:` area label**, and
-milestones are for things that end.
+Two taxonomy rules govern every rewrite below, so settle them before you start:
+**exactly one area label per issue** — work spanning two areas is two issues, or
+one issue plus a cross-cutting topic tag — and **milestones are for things that
+end**. Before assigning a milestone, ask what has to be true for it to close; if
+you can't answer in one sentence, that's a label, not a milestone. An epic is
+always a label, because an epic in a milestone holds it open forever.
+
+(If you also run `tg:new-ticket`, its bundled conventions reference is the
+longer version of the same taxonomy, and `.claude/tg.json` overrides both.)
 
 Then establish the ground truth, and say the number out loud:
 
