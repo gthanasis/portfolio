@@ -3,26 +3,22 @@ import type { CSSProperties } from 'react'
 import { ClipVideo } from '@/components/blog/ClipVideo'
 import { products, type Product } from '@/lib/products'
 
-const others = products.filter((p) => !p.featured)
+const sizes = '(max-width: 640px) 100vw, 504px'
 
-function Title({ p }: { p: Product }) {
-  return (
-    <h4>
-      {p.url ? <a href={p.url}>{p.name}</a> : p.name}{' '}
-      <span className={p.status === 'live' ? 'status live' : 'status'}>{p.status}</span>
-    </h4>
-  )
+/** Where the card goes, as its foot shows it: the site's domain, or "github" for a repo. */
+function destination(url: string) {
+  const host = new URL(url).hostname.replace(/^www\./, '')
+  return host === 'github.com' ? 'github' : host
 }
 
-/** The picture at the top of a product card: both theme versions of an image (CSS shows one), or a clip. */
-function Visual({ p }: { p: Product }) {
-  const v = p.visual!
+function Visual({ v }: { v: Product['visual'] }) {
   if (v.kind === 'clip') return <ClipVideo src={v.src} label={v.label} />
+  if (v.kind === 'shot') return <Image src={v.src} alt={v.alt} width={1200} height={675} sizes={sizes} />
   const bg = { '--frame-light': v.background.light, '--frame-dark': v.background.dark } as CSSProperties
   return (
     <div className="frame-bg" style={bg}>
-      <Image className="only-dark" src={v.dark} alt={v.alt} width={1600} height={550} sizes="(max-width: 720px) 100vw, 508px" />
-      <Image className="only-light" src={v.light} alt={v.alt} width={1600} height={550} sizes="(max-width: 720px) 100vw, 508px" />
+      <Image className="only-dark" src={v.dark} alt={v.alt} width={1600} height={550} sizes={sizes} />
+      <Image className="only-light" src={v.light} alt={v.alt} width={1600} height={550} sizes={sizes} />
     </div>
   )
 }
@@ -34,75 +30,39 @@ export function Building() {
         <h2 id="h-proj">What I&apos;m building now.</h2>
         <p>Built with the same loop.</p>
       </div>
-      <article className="feature">
-        <header className="feature-head">
-          <Image className="feature-logo" src="/projects/born-to-party-icon.png" alt="" width={52} height={52} />
-          <div className="feature-title">
-            <h3>
-              Born to Party <span className="status live">live</span>
-            </h3>
-            <p>Invitations worth opening. Sixty-seven designed themes, one link to send, and RSVPs that come back to you.</p>
-          </div>
-          <a className="btn feature-cta" href="https://borntoparty.app">
-            Visit{' '}
-            <svg className="ext" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M7 7h10v10M7 17 17 7" />
-            </svg>
-          </a>
-        </header>
-        <a className="shot" href="https://borntoparty.app" aria-label="Open borntoparty.app">
-          <div className="chrome" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-            <span>borntoparty.app</span>
-          </div>
-          <Image
-            src="/projects/born-to-party.jpg"
-            alt="Born to Party homepage: send something worth opening, next to a Halloween party invitation"
-            width={1200}
-            height={560}
-            sizes="(max-width: 1080px) 100vw, 1032px"
-          />
-        </a>
-        <div className="feature-meta">
-          <span>next.js</span>
-          <span>node</span>
-          <span>mongodb</span>
-        </div>
-      </article>
-      <h3 className="products-head">Also building</h3>
-      <ul className="products shots">
-        {others
-          .filter((p) => p.visual)
-          .map((p) => (
-            <li key={p.name}>
-              {/* An image links to the project too; a clip doesn't, since it may show its own controls. */}
-              {p.url && p.visual?.kind === 'image' ? (
-                <a className="frame" href={p.url} tabIndex={-1} aria-hidden="true">
-                  <Visual p={p} />
-                </a>
-              ) : (
-                <div className="frame">
-                  <Visual p={p} />
-                </div>
-              )}
-              <div className="body">
-                <Title p={p} />
-                <p>{p.blurb}</p>
-              </div>
-            </li>
-          ))}
-      </ul>
-      <ul className="products">
-        {others
-          .filter((p) => !p.visual)
-          .map((p) => (
-            <li key={p.name}>
-              <Title p={p} />
+      <ul className="showcase">
+        {products.map((p) => (
+          <li key={p.name}>
+            <div className="frame">
+              <Visual v={p.visual} />
+            </div>
+            <div className="body">
+              <h3>
+                {/* The name's link covers the whole card. */}
+                {p.url ? <a href={p.url}>{p.name}</a> : p.name}{' '}
+                <span className={p.status === 'live' ? 'status live' : 'status'}>{p.status}</span>
+              </h3>
               <p>{p.blurb}</p>
-            </li>
-          ))}
+              <div className="meta">
+                <span className="stack">
+                  {p.stack.map((s) => (
+                    <span key={s}>{s}</span>
+                  ))}
+                </span>
+                {p.url ? (
+                  <span className="to" aria-hidden="true">
+                    {destination(p.url)}{' '}
+                    <svg className="ext" viewBox="0 0 24 24">
+                      <path d="M7 7h10v10M7 17 17 7" />
+                    </svg>
+                  </span>
+                ) : (
+                  <span>invite only</span>
+                )}
+              </div>
+            </div>
+          </li>
+        ))}
       </ul>
     </section>
   )
