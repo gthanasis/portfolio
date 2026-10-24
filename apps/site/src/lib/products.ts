@@ -25,6 +25,8 @@ export const products: Product[] = [
     blurb: 'Take a number, take a walk. Walk-ins scan a QR at the door and wait on their phone. Staff call them from a tablet.',
     status: 'live',
     url: 'https://get-a-seat.com',
+    terms: 'https://get-a-seat.com/terms',
+    privacy: 'https://get-a-seat.com/privacy',
     stack: ['next.js', 'nestjs', 'postgres'],
     visual: { kind: 'shot', src: '/projects/get-a-seat.jpg', alt: 'Get a Seat homepage next to a queue ticket, number 17' },
   },
