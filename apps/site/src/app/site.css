@@ -164,47 +164,38 @@ h1 em { font-style: normal; color: hsl(var(--primary)); }
 .year-cap { margin-top: 8px; display: flex; justify-content: space-between; font: .72rem var(--font-mono), monospace; color: hsl(var(--muted-foreground)); }
 @media (max-width: 560px) { .swap { grid-template-columns: 1fr; } .swap .arr { justify-self: center; transform: rotate(90deg); } }
 
-/* what I'm building: one product, stacked and aligned to the page edge */
-.feature-head { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; margin-bottom: 24px; }
-.feature-logo { width: 52px; height: 52px; border-radius: 12px; object-fit: contain; padding: 8px; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); }
-.feature-title h3 { margin: 0 0 4px; font-size: 1.35rem; font-weight: 600; letter-spacing: -.02em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.feature-title p { margin: 0; color: hsl(var(--muted-foreground)); max-width: 60ch; }
-.status { font: 500 .72rem var(--font-mono), monospace; padding: 3px 9px; border-radius: 999px; border: 1px solid hsl(var(--border)); color: hsl(var(--muted-foreground)); }
+/* what I'm building: every product as the same card, two to a row */
+.status { font: 500 .72rem var(--font-mono), monospace; padding: 3px 9px; border-radius: 999px; border: 1px solid hsl(var(--border)); color: hsl(var(--muted-foreground)); white-space: nowrap; }
 .status.live { color: hsl(var(--primary)); border-color: hsl(var(--primary) / .5); }
 .ext { width: 13px; height: 13px; vertical-align: -1px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.shot { display: block; border: 1px solid hsl(var(--border)); border-radius: 12px; overflow: hidden; background: hsl(var(--card)); transition: border-color .25s; }
-.shot:hover { border-color: hsl(var(--foreground) / .3); }
-.shot .chrome { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid hsl(var(--border)); font: .75rem var(--font-mono), monospace; color: hsl(var(--muted-foreground)); }
-.shot .chrome i { width: 10px; height: 10px; border-radius: 50%; background: hsl(var(--muted)); }
-.shot .chrome span { margin: 0 auto; padding: 3px 14px; border-radius: 6px; background: hsl(var(--muted)); }
-.shot img { display: block; width: 100%; height: auto; }
-.feature-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; font: .8rem var(--font-mono), monospace; color: hsl(var(--muted-foreground)); }
-@media (max-width: 640px) {
-  .feature-head { grid-template-columns: auto 1fr; }
-  .feature-cta { grid-column: 1 / -1; justify-self: start; }
-  .feature-logo { width: 44px; height: 44px; align-self: start; }
-}
-
-/* the other products, listed under the featured one */
-.products-head { margin: 56px 0 16px; font-size: 1rem; font-weight: 600; color: hsl(var(--muted-foreground)); }
-.products { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-.products li { padding: 18px 20px; border: 1px solid hsl(var(--border)); border-radius: 12px; background: hsl(var(--card)); }
-.products h4 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.products h4 a { color: inherit; }
-.products p { margin: 0; color: hsl(var(--muted-foreground)); font-size: .95rem; }
-.products.shots { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: 16px; }
-.products.shots li { padding: 0; overflow: hidden; display: flex; flex-direction: column; transition: border-color .25s; }
-.products.shots li:hover { border-color: hsl(var(--foreground) / .3); }
-.products.shots .body { padding: 16px 20px 18px; }
+.showcase { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.showcase li { position: relative; display: flex; flex-direction: column; border: 1px solid hsl(var(--border)); border-radius: 12px; background: hsl(var(--card)); overflow: hidden; transition: border-color .25s; }
+.showcase li:hover { border-color: hsl(var(--foreground) / .3); }
+.showcase li:has(h3 a:focus-visible) { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 /* The pictures share one shape, so cards side by side line up; each fills it its own way. */
-.products.shots .frame { display: block; aspect-ratio: 16 / 9; border-bottom: 1px solid hsl(var(--border)); overflow: hidden; }
-.products.shots .frame video { display: block; width: 100%; height: 100%; object-fit: cover; }
-.products.shots .frame-bg { height: 100%; display: grid; place-items: center; padding: 0 4%; background: var(--frame-dark); }
-.products.shots .frame-bg img { width: 100%; height: auto; }
-:root[data-theme='light'] .products.shots .frame-bg { background: var(--frame-light); }
+.showcase .frame { aspect-ratio: 16 / 9; border-bottom: 1px solid hsl(var(--border)); overflow: hidden; background: hsl(var(--muted)); }
+.showcase .frame > img, .showcase .frame video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.showcase .frame > img { transition: transform .5s; }
+.showcase li:hover .frame > img { transform: scale(1.02); }
+/* With reduced motion the clip shows its controls: keep them above the card's link. */
+.showcase .frame video[controls] { position: relative; z-index: 1; }
+.showcase .frame-bg { height: 100%; display: grid; place-items: center; padding: 0 4%; background: var(--frame-dark); }
+.showcase .frame-bg img { width: 100%; height: auto; }
+:root[data-theme='light'] .showcase .frame-bg { background: var(--frame-light); }
 .only-light { display: none; }
 :root[data-theme='light'] .only-light { display: block; }
 :root[data-theme='light'] .only-dark { display: none; }
+.showcase .body { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 18px 20px 16px; }
+.showcase h3 { margin: 0; font-size: 1.1rem; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.showcase h3 a { color: inherit; text-decoration: none; }
+.showcase h3 a::after { content: ''; position: absolute; inset: 0; }
+.showcase h3 a:focus-visible { outline: none; }
+.showcase p { margin: 0; flex: 1; color: hsl(var(--muted-foreground)); font-size: .95rem; }
+.showcase .meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 1px solid hsl(var(--border)); font: .78rem var(--font-mono), monospace; color: hsl(var(--muted-foreground)); }
+.showcase .stack { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.showcase .to { white-space: nowrap; transition: color .2s; }
+.showcase li:hover .to { color: hsl(var(--primary)); }
+@media (max-width: 640px) { .showcase { grid-template-columns: 1fr; gap: 16px; } }
 
 /* legal: the company behind the products */
 .legal { padding: 64px 0 24px; max-width: 68ch; }
