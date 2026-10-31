@@ -60,9 +60,13 @@ jobs:
       # references an immutable image, so "roll back" means re-applying an
       # older tag rather than hoping latest still points where you think.
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
+          # Fetch the base images afresh, so the daily rebuild picks up their
+          # security fixes instead of reusing the cached layers.
+          pull: true
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ env.IMAGE }}:${{ github.sha }}
@@ -130,8 +134,11 @@ jobs:
         run: |
           cd deploy/k8s
           kubectl kustomize --help >/dev/null
-          # Pin the manifests to the image this run just built.
-          sed -i "s|newTag: .*|newTag: ${{ github.sha }}|" kustomization.yaml
+          # Pin the manifests to the image this run just built. The digest
+          # matters for the daily rebuild: the commit, and so the tag, is the
+          # same as yesterday's, and without it the pods would never restart
+          # onto the new image.
+          sed -i "s|newTag: .*|newTag: ${{ github.sha }}\n    digest: ${{ steps.build.outputs.digest }}|" kustomization.yaml
           cd -
           kubectl apply -k deploy/k8s
 

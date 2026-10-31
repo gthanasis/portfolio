@@ -26,6 +26,13 @@ RUN npm run build
 # The unprivileged variant: runs as a non-root user throughout and listens on 8080.
 FROM nginxinc/nginx-unprivileged:1.31-alpine AS runtime
 
+# The base image is rebuilt less often than Alpine ships security fixes (it
+# still had a vulnerable brotli-libs in Oct 2026), so take them at build time.
+# Root for this one step only; 101 is the base image's own nginx user.
+USER root
+RUN apk upgrade --no-cache
+USER 101
+
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY deploy/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/apps/site/out /usr/share/nginx/site
