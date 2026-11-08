@@ -79,20 +79,21 @@ export function Kbd({ children }: { children: ReactNode }) {
   return <kbd className="kbd">{children}</kbd>
 }
 
+const SKILLS_ON_GITHUB = 'https://github.com/gthanasis/portfolio/tree/main/apps/site/content/skills'
+
 /**
  * Section header for one item in a catalogue post: the item's mono name, then its `## heading`
  * and a one-line tagline written inside as markdown, so the heading keeps its anchor.
  * `needs` lists what the skill expects to be installed or set up.
- * When content/skills/<name>/ exists, its SKILL.md can be shown, and it downloads as the file, or as a zip
- * when the skill ships references or scripts (both published by scripts/build-skills.mjs).
+ * When content/skills/<name>/ exists, its SKILL.md can be shown, and it downloads as the file (published by
+ * scripts/build-skills.mjs), or, when the skill ships references or scripts, links to its folder on GitHub.
  */
 export async function Skill({ name, needs, children }: { name: string; needs?: string[]; children: ReactNode }) {
   const slug = name.replace(/^tg:/, '')
   const dir = path.join(process.cwd(), 'content/skills', slug)
   const source = await readFile(path.join(dir, 'SKILL.md'), 'utf8').catch(() => null)
-  // What the zip adds beside SKILL.md, by top-level name: ['references', 'scripts'], or ['REFERENCE.md'].
+  // What the folder holds beside SKILL.md, by top-level name: ['references', 'scripts'], or ['REFERENCE.md'].
   const extras = source === null ? [] : (await readdir(dir)).filter((f) => f !== 'SKILL.md' && !f.startsWith('.')).sort()
-  const zipped = extras.length > 0
   return (
     <div className="sk-head">
       <span className="sk-name">{name}</span>
@@ -105,8 +106,8 @@ export async function Skill({ name, needs, children }: { name: string; needs?: s
       {source !== null && (
         <SkillSourceToggle
           id={`source-${slug}`}
-          href={zipped ? `/skills/${slug}.zip` : `/skills/${slug}/SKILL.md`}
-          filename={zipped ? `tg-${slug}.zip` : `tg-${slug}-SKILL.md`}
+          href={extras.length > 0 ? `${SKILLS_ON_GITHUB}/${slug}` : `/skills/${slug}/SKILL.md`}
+          filename={`tg-${slug}-SKILL.md`}
           extras={extras}
           lines={source.trimEnd().split('\n').length}
         >
